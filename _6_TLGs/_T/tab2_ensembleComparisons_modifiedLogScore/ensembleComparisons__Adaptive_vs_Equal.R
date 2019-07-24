@@ -1,0 +1,110 @@
+#mcandrew
+require(lme4)
+require(lmPerm)
+
+
+rename <- function(d,old,new){
+    names(d)[names(d)==old] <- new
+    return(d)
+}
+
+computeEstimates <- function(model){
+    
+    cf <- coef(model)
+    means <- do.call(rbind.data.frame, cf)
+
+    re <- ranef(model, condVar=TRUE)
+
+    ses <- arm::se.coef(model)
+    InterceptVariability <- ses$fixef
+    ses$fixef <- NULL
+    
+    ses <- sapply( ses, function(x){sqrt(x^2+InterceptVariability^2)})
+    
+    sds   <- do.call(rbind.data.frame, ses)
+
+    e95target <- cf$target+1.96*ses$target
+    e95season <- cf$season+1.96*ses$season
+    e95region <- cf$region+1.96*ses$region
+    uppers <- list("region" = e95region, "season" = e95season, "target" = e95target)
+    upperCnf <- do.call(rbind.data.frame, uppers)
+    
+    e5target <- cf$target-1.96*ses$target
+    e5season <- cf$season-1.96*ses$season
+    e5region <- cf$region-1.96*ses$region
+    lowers <- list("region" = e5region, "season" = e5season, "target" = e5target)
+    lowerCnf <- do.call(rbind.data.frame, lowers)
+    
+    pvTarget <- data.frame("(Intercept)" = apply(cbind(cf$target,ses$target),1, function(x){2*(1 - pnorm(abs(x[1]),0,x[2]))}))
+    pvSeason <- data.frame("(Intercept)" = apply(cbind(cf$season,ses$season),1, function(x){2*(1 - pnorm(abs(x[1]),0,x[2]))}))
+    pvRegion <- data.frame("(Intercept)" = apply(cbind(cf$region,ses$region),1, function(x){2*(1 - pnorm(abs(x[1]),0,x[2]))}))
+    ps <- list("region" = pvRegion, "season" = pvSeason, "target" = pvTarget)
+    pvalues <- do.call(rbind.data.frame, ps)
+
+
+    outputCoef <- function(model,type,specificType){
+        dta <- eval(parse(text=paste0("coef(model)$",type)))
+        return( dta[row.names(dta)==specificType,"(Intercept)"])
+    }
+    bootStrapPvalues <- data.frame(rep(0,length(row.names(pvalues))))
+    row.names(bootStrapPvalues) = row.names(pvalues)
+    names(bootStrapPvalues) = c('Intercept')
+
+    print('bootstrapping')
+    for (i in 1:dim(bootStrapPvalues)[1]){
+        print(i)
+        type_sType <- row.names(bootStrapPvalues)[i]
+        type <- strsplit(type_sType,'[.]')[[1]][1]
+        stype <- strsplit(type_sType,'[.]')[[1]][2]
+        
+        rslts <- as.matrix(as.data.frame(bootMer(x=model, function(x){outputCoef(x,type,stype)}, nsim=1000)))
+        rslts <- rslts-mean(rslts) # center
+        statistic <-means[type_sType,'(Intercept)']
+        pvalue <- mean(abs(rslts) > statistic)
+        bootStrapPvalues[type_sType,"(Intercept)"] <- pvalue
+    }
+    
+    rslts <- cbind(means,sds,lowerCnf,upperCnf,pvalues,bootStrapPvalues)
+    names(rslts) <- c("means","se","lowerCI","upperCI","p",'bootP')
+    return(rslts)
+}
+
+
+#------------------------------------------
+
+d <- read.csv('../../../_5_compute_and_score__ensembles/analysisData/allEnsembleScores.csv')
+
+dynamic <- d[d$modelType=='dynamic',]
+dynamic08 <- dynamic[dynamic$prior==0.08,]
+dynamic08 <- rename(dynamic08,'logScore5','logScoreDynamic5')
+
+equal   <- d[d$modelType=='equal',]
+equal   <- rename(equal,'logScore5','logScoreEqual5') 
+
+DSE <- merge(dynamic08,equal,by = c('region','target','EWNum'))
+
+DSE['difDE'] <- DSE$logScoreDynamic - DSE$logScoreEqual
+DSE['year'] <- substr(DSE$EWNum,1,4)
+DSE['week'] <- substr(DSE$EWNum,5,6)
+
+computeSeason <- function(x){
+    year <- strtoi(x['year'])
+    nextYear <- year+1
+    pastYear <- year-1
+    return(ifelse(x['week'] <53 & x['week'] >=40 , paste0(year,'/',nextYear) , paste0(pastYear,'/',year)))
+}
+DSE['season'] <- apply(DSE,1,computeSeason)
+
+deRslts <- lmer( difDE~(1|season) + (1|target) + (1|region), data = DSE)
+deRslts <- computeEstimates(deRslts)
+write.csv(deRslts,"tableData/deRslts.csv")
+
+#buildTables
+require(xtable)
+
+print("Adaptive vs Equal")
+deRslts <- round(deRslts,2)
+deRslts$EffectSize <- paste0(deRslts$means," (",deRslts$lowerCI,", ",deRslts$upperCI,")")
+deRslts <- deRslts[, c("EffectSize",'p') ]
+deRslts$p <- sapply(deRslts$p,function(x){ifelse(x==0,"<0.01",x)})
+xtable(deRslts)
