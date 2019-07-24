@@ -28,7 +28,7 @@ fig5_pairedDifferencesOnLogScores.pdf: fig5_pairedDifferencesOnLogScores.py\
 	$(call timeStamp,$(LOG),"fig5 updated")
 
 ../../_T/tab1_ensembleComparisons/tableData/deRslts.csv:
-	cd ../../_T/tab1_ensembleComparisons && $(MAKE)
+	$(MAKE) -C ../../_T/tab1_ensembleComparisons
 
 ../../_T/tab1_ensembleComparisons/tableData/dsRslts.csv:
-	cd ../../_T/tab1_ensembleComparisons && $(MAKE)
+	$(MAKE) -C ../../_T/tab1_ensembleComparisons
