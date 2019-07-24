@@ -1,0 +1,1094 @@
+%!TEX TS-program = pdflatexmk
+%\documentclass[onecolumn,secnumarabic,amssymb, nobibnotes, aps, pr,superscriptaddress]{revtex4-1}
+
+\documentclass[12pt]{article}
+
+% common packages
+% ----------------------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{stackengine,graphicx}
+\usepackage{natbib}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{bbm}
+%\usepackage{booktabs}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{collectbox}
+\usepackage{bbm}
+\usepackage{capt-of}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=black
+}
+\usepackage{lineno}
+\linenumbers
+
+\usepackage[framemethod=TikZ]{mdframed} 
+\usepackage{tcolorbox} 
+
+% project-specific packages
+% ----------------------------------------
+\def \ew{\textbf{EW}}
+\def \cw{\textbf{CW}}
+\def \ttw{\textbf{TTW}}
+
+% common latex functions
+% ----------------------------------------
+\def\l{\left}
+\def\r{\right}
+
+\newcommand{\f}{\frac}
+\newcommand{\mean}[1]{ \l<#1\r> }
+\newcommand{\statMean}[1]{ \mathbbm{E}\l(#1\r) }
+
+\def\dx{\hspace{5mm}}
+
+% project-specific functions
+% ----------------------------------------
+\usepackage{array}
+\newcolumntype{L}{>{\arraybackslash}m{7cm}}
+
+
+% editorial and revision functions
+% ----------------------------------------
+\def\tcm#1{{\small\color{Gray}\textbf{[tcm: #1]}}} 
+\def\ngr#1{{\small\color{Red}\textbf{[ngr: #1]}}} 
+
+\def\todo#1{{\color{blue}\textbf{[TODO: #1]}}}
+\def\putin#1{{\color{blue}\textbf{[PUTIN: #1]}}}
+\def\del#1{{\color{Green}\textbf{[#1]}}}
+\def\comment#1{{\color{red}\textbf{[Comment: #1]}}}
+
+\def\adaptNon#1{adaptive$_{\text{non}}$}
+\def\adaptOpt#1{adaptive$_{\text{opt}}$}
+\def\adaptOver#1{adaptive$_{\text{over}}$}
+
+% misc functions 
+% ----------------------------------------
+\newcommand{\n}[1]{ {\tiny\textbf{\underline{\textit{#1}}}}}
+
+\newcommand{\rowgroup}[1]{\hspace{-1em}#1}
+\newcommand*{\Scale}[2][4]{\scalebox{#1}{\ensuremath{#2}}}%
+\newcommand{\fb}[2]{\framebox(#1,20){#2}}
+
+
+\newcommand{\umassBiostat}{Department of Biostatistics and Epidemiology,\\
+School of Public Health and Health Sciences\\
+University of Massachusetts~Amherst,\\
+Amherst, Massachusetts, United States of America}
+
+
+%\date{\today} 
+
+%\pdfminorversion=4
+% NOTE: To produce blinded version, replace "0" with "1" below.
+\newcommand{\blind}{0}
+
+% DON'T change margins - should be 1 inch all around.
+\addtolength{\oddsidemargin}{-.5in}%
+\addtolength{\evensidemargin}{-.5in}%
+\addtolength{\textwidth}{1in}%
+\addtolength{\textheight}{-.3in}%
+\addtolength{\topmargin}{-.8in}%
+
+\begin{document}
+\def\spacingset#1{\renewcommand{\baselinestretch}%
+{#1}\small\normalsize} \spacingset{1}
+
+\if1\blind
+{
+  \title{\bf Title}
+  \author{Author 1\thanks{
+    The authors gratefully acknowledge \textit{please remember to list all relevant funding sources in the unblinded version}}\hspace{.2cm}\\
+    Department of YYY, University of XXX\\
+    and \\
+    Author 2 \\
+    Department of ZZZ, University of WWW}
+  \maketitle
+} \fi
+
+\if0\blind
+{ \bigskip
+  \bigskip
+  \bigskip
+  %\begin{center}
+   \title{\LARGE\bf Adaptively stacking ensembles for influenza forecasting with incomplete data}
+    \author{Thomas~McAndrew, Ph.D \\  
+            %\umassBiostat\\
+             and\\
+             Nicholas~Reich, Ph.D \\
+            \umassBiostat}
+  % \end{center}
+  %\medskip
+  \maketitle
+} \fi
+
+\bigskip
+\begin{abstract}
+  Seasonal influenza infects between 10 and 50 million people in the United States every year, overburdening hospitals during weeks of peak incidence.
+  Named by the CDC as an important tool to fight the damaging effects of these epidemics, accurate forecasts of influenza and influenza-like illness (ILI) forewarn public health officials about when, and where, seasonal influenza outbreaks will hit hardest.
+  % 
+Multi-model ensemble forecasts---weighted combinations of component models---have shown positive results in forecasting. 
+Ensemble forecasts of influenza outbreaks have been static, training on all past ILI data at the beginning of a season, generating a set of optimal weights for each model in the ensemble, and keeping the weights constant.
+We propose an adaptive ensemble forecast that (i) changes model weights week-by-week throughout the influenza season, (ii) only needs the current influenza season's data to make predictions, and (iii) by introducing a prior distribution, shrinks weights toward the reference equal weighting approach and adjusts for observed ILI percentages that are subject to future revisions.
+%
+We investigate the prior's ability to impact adaptive ensemble performance and, after finding an optimal prior via a cross-validation approach, compare our adaptive ensemble’s performance to equal-weighted and static ensembles.
+Applied to forecasts of short-term ILI incidence at the regional and national level in the US, our adaptive model outperforms a na\"ive equal-weighted ensemble, and has similar or better performance to the static ensemble, which requires multiple years of training data.
+%
+Adaptive ensembles are able to quickly train and forecast during epidemics, and provide a practical tool to public health officials looking for forecasts that can conform to unique features of a specific season.
+\end{abstract}
+
+\noindent%
+{\it Keywords:}  Combination forecasting, Influenza, Bayes
+\vfill
+
+\newpage
+\spacingset{1.45} % DON'T change the spacing!
+
+\section{Introduction}
+
+Every year seasonal influenza costs hospitals time and resources, and causes significant loss of life, especially among patients with cardiac disease, previous respiratory illness or allergies, children and the elderly~\cite{centers2009prevention,russell2008global,harper2009seasonal,garten2018update}.
+During the season's peak, hospitals admit patients beyond capacity, and in severe cases, for greater lengths of stay, postponing lower priority but still important surgeries~\cite{krumkamp2011health,schanzer2013impact,molinari2007annual}.
+The total economic burden of influenza outbreaks (including medical costs, lost earnings, and loss of life) in the US alone are estimated to exceed \$85 billion annually~\cite{molinari2007annual}.
+
+Accurate forecasts of influenza can help with public health response.
+Public health officials at the national, regional, and state level benefit from the advance warning forecasts can provide, by preparing hospitals for increased disease burden~\cite{reed2009infection}, shifting vaccines to places in need~\cite{germann2006mitigation}, and alerting the public~\cite{vaughan2009effective}.
+%
+Recognizing the value of accurate forecasting, the US Centers for Disease Control and Prevention (CDC) have organized forecasting challenges around seasonal influenza outbreaks~\cite{biggerstaff2016results,biggerstaff2018results,mcgowan2019collaborative}. 
+These challenges focus on generating weekly forecasts of influenza-like illness (ILI) rates at the national and regional level in the US. 
+ILI is a syndromic classification, defined as a fever plus an additional symptom such as a cough or sore throat.
+Public health officials regard ILI surveillance data as an important indicator of the trends and severity of a given influenza season~\cite{biggerstaff2017systematic}.
+
+The CDC influenza forecasting challenges, nicknamed FluSight, have spurred methodological development in the area of influenza forecasting and infectious disease forecasting more broadly.
+This effort has led to multiple research groups developing models trained on historical ILI data to forecast future incidence across the US.
+These models include statistical and mechanistic models, among other approaches~\cite{shaman2012forecasting,brooks2015flexible,ray2017infectious,osthus2018dynamic}.
+
+Decision-makers have requested a single unified forecast, and several groups have developed multi-model ensemble forecasts of influenza. 
+These models synthesize predictions from a set of different component models and have shown better predictive ability compared to any single model~\cite{yamana2017individual,ray2018prediction,reich2019collaborative}.
+
+Multi-model ensembles aggregate diverse component model predictions into a final `meta-prediction' that is often, but not always, more robust than any single component model~\cite{zhou2012ensemble,sewell2008ensemble}.
+This robustness comes from the ensemble's mixture of component models.
+Freed from having to make a single set of assumptions about the data, the ensemble never depends on just one model and associated limitations~\cite{zhou2012ensemble,sewell2008ensemble}.
+In contrast to ensemble modeling approaches like 
+bagging~\cite{breiman1996bagging,dietterich2000ensemble} and boosting~\cite{schapire2003boosting,dietterich2000ensemble} which create a library of similar component models, multi-model ensembles combine distinct component models together, possibly models designed and implemented in completely different modeling paradigms. Application examples include weather \cite{krishnamurti1999improved}, economics\cite{garratt2011real}, energy production\cite{pierro2016multi}, education\cite{adejo2018predicting}, and infectious disease \cite{reich2019collaborative}. 
+
+Extending an existing ensemble implementation~\cite{reich2019collaborative}, we developed a new method for combining component models that relies on recently observed in-season data to adaptively estimate a convex combination of models, sometimes referred to as a ``linear pool''.
+Though past work has studied methods for training ensembles from a fixed data set~\cite{gneiting2005weather,foley2012current,van2007super}, and continuously adapting ensembles to streaming data~\cite{pari2018multi,fern2003online,benkeser2018online},
+a unique and new challenge in our setting is the reliance on noisy, revision-prone observations like weekly ILI surveillance data.
+Recent ILI observations, because they come from a real-time public health surveillance system, are subject to revisions, which are occasionally substantial and can negatively impact forecast accuracy ~\cite{osthus2019even,reich2019collaborativepnas}.
+Like past work in ensemble forecasting, this work combines a fixed set of probabilistic forecasting models provided by different forecasting teams~\cite{reich2019collaborativepnas} and does not presume to have the capability to refit  component model parameters.
+
+To protect the adaptive multi-model ensemble framework from relying too heavily on recent, revision-prone ILI data, we developed a Bayesian model that uses a prior to regularize ensemble weights.
+Previous results in this field show equally-weighted ensembles often perform very well~\cite{mcgowan2019collaborative,reich2019collaborative}, and to align with these results, we chose a uniform Dirichlet prior that shrinks model weights towards equal.
+Our prior is also time dependent. 
+Unlike a typical model where the prior becomes less influential with increasing data, our prior is designed to exert a constant influence on the final model weights. 
+Our model never allows model weights to depend only on revision-prone data.
+We show our Bayesian framework can be solved with a Variational Inference algorithm~(\textbf{devi-MM}), and show that an existing Expectation-Maximization approach to ensemble weight estimation~\cite{reich2019collaborative} is a special case.
+
+
+We compared ensembles with equal model weights~(\textbf{EW}) and those with possibly unequal but static, unchanging weights throughout a season (\textbf{static}),  against our adaptive ensemble~(\textbf{adaptive}) which updated component model weights every week.
+Static ensembles were trained on all data before the beginning of each season and were unable to modify their model weights in-season.
+In contrast, adaptive ensembles were only trained on within-season data but could modify their weights as each additional week of ILI data was reported.
+Comparing static and equal to adaptive ensembles, we highlight: (i) the adaptive model's ability to buffer against sparse and revision-prone data by using a prior over ensemble weights and (ii) similar, and sometimes improved, performance when comparing adaptive to static models, where adaptive models require substantially less data to train.
+
+The manuscript is structured as follows: Section~2 describes the CDC influenza training data and component models included in all ensembles, defines performance metrics, and develops the methodology for our adaptive ensemble. Section 3 presents results, investigating the prior's impact on adaptive ensemble performance and compares the adaptive ensemble to static and equally weighted ensembles. Section 4 relates this work to linear pooling algorithms, and discusses our approach in the broader context of data-driven, evidence-based public health decision making.
+
+\section{Methods}
+
+\subsection{Data}
+\subsubsection{Influenza data}
+Every week throughout the season, for $10$ different reporting regions (HHS1, HHS2, .., HHS10) and a national average, the CDC publishes surveillance data on influenza-like illness~(ILI).
+ILI is defined as the percentage of patients presenting with a fever~(greater than 100F) plus cough or sore throat.
+More than $3,500$ outpatient clinics report ILI percentages to the CDC as part of the ILINet surveillance system.
+In addition to the newest ILI data, updates to past ILI percentages are also published weekly.
+
+Because of reporting delays, ILI percentages undergo revisions every week after they're first reported, finalized only several weeks after the season ends.
+Revisions make predicting future ILI difficult. Component model forecasts need to update week-to-week for two reasons: (i) the newest ILI data is reported, and (ii) all previous ILI values have been revised.
+Advanced forecasting models try to adjust for this revision process and the uncertainty in reported data, typically outperforming models that do not account for data revisions.\cite{brooks2018nonmechanistic}
+
+\subsubsection{Forecasting data}
+
+The FluSight Network (FSN) is a collaborative group of influenza forecasters that use historical performance of models to build ensemble forecasts.
+Teams trained their models and generated forecasts as if their model had been applied in real-time across all seasons since $2010/2011$.
+The resulting collection of forecasts serves as a historical record of how each model would have performed in real-time.\cite{reich2019collaborativepnas}
+
+For the most recent $2018/2019$ season, $21$ `component' models with probabilistic forecasts were submitted as if they were forecasting in real-time, contending with ILI data revisions.\ngr{why are we talking about the 2018/2019 season here? should this be 2017/2018? you don't use any 2018/2019 data, right? maybe just delete this sentence? or maybe clarify whether the 2017/2018 forecasts you are using were actually made in real-time or were they made retrospectively? i can help you figure this out if it's not clear.}
+
+For the CDC FluSight challenges, component forecast models and ensembles built from them, forecast $7$ key targets (Figure \ref{fig1.forecastingConcept}). These targets are $1$, $2$, $3$, $4$ week-ahead ILI percentages, onset week (defined as the week where $3$ consecutive weeks are above the CDC-specified baseline ILI percentage), the season peak week (the epidemic week with highest ILI percentage), and the season peak percentage (the highest ILI percentage throughout the season).
+The CDC cannot determine with certitude the start of the influenza season and when the peak occurs until mid-summer, due to continued revisions to data.
+This means final performance data on forecasts---the data used for building ensembles---for the $3$ seasonal targets~(baseline onset, season peak week and percentage) can not be compiled until after the season closes.
+Therefore, only component model forecasts of the $4$ week-ahead targets will be used for training from the FluSight Network.
+
+The difficulty estimating ensemble weights comes from ILI data revisions.
+An adaptive ensemble must compute weights based on component model performance---the probability component model forecasts place on true ILI values.
+But past ILI data is revised weekly.
+The best estimate of true ILI component model performance changes as past ILI data is revised. 
+An adaptive ensemble must then account for ILI revisions because they change past component model performance week to week.
+
+Seasons from $2011/2012$ up to $2017/2018$ will be used to compare equal, static, and adaptive ensembles, holding out the $2010/2011$ as a training season to build a prior for the adaptive ensemble.
+
+\graphicspath{{../_6_TLGs/_G/fig1_conceptDiagram/}}
+\begin{figure}[ht!]
+  \centering
+   \includegraphics[scale=0.60]{fig1_conceptDiagram}
+  \caption{
+ Overview of forecasting targets and data used in model estimation. {\bf Top Panel:} Zooming in on one region-season illustrates the $7$ forecasting targets, divided into week ahead ($1$, $2$, $3$, and $4$), and seasonal (onset, peak week, peak percentage) targets.
+    Due to delays in reporting at time $t$, forecasting models only have data available up to $t-2$ weeks, making the current calendar week the $2$~wk ahead forecast (sometimes titled the nowcast). 
+    {\bf Bottom Panels:} Three ensemble algorithms: equally-weighted, static, and adaptive, take different approaches to training and prediction, illustrated by how they would operate in the 2017/2018 season. 
+    Equally-weighted ensembles ignore past ILI data, weighting all component models the same and forecast the next season.
+    Static ensembles train on all previous seasons~(green, up-right slanting lines), find optimal weights for all component models, and keeping these weights fixed, forecast the next season~(red, down-right slanting lines).
+    Adaptive ensembles train and forecast all in the current season~(red and green cross-hatch), ignoring any past data.
+    For adaptive ensembles, every week component model weights are updated on all current within-season data and then used to forecast the next week.
+    \label{fig1.forecastingConcept}}
+\end{figure}
+
+\subsubsection{Performance metrics} \label{performanceMetrics}
+A useful predictive model must be well-calibrated and accurate, consistently placing high probability on potential ILI percentages, that after all revisions, become the final ILI percentage.
+A proper scoring rule~\cite{dawid2014theory} widely accepted in the forecasting community, the logscore~\cite{dawid2014theory,reich2019collaborativepnas} is defined as the predicted probability placed on a future true (or finally revised) ILI value.
+The CDC has also adopted a modified logscore as their standard scoring metric.
+Given a model with probability density function $f(z)$ and true ILI value $i*$, both the logscore and modified logscore can be written
+\begin{equation}
+  \text{logscore}\l(f\r) = \int_{z = i*-w}^{z=i*+w}f(z)\; dz, \label{analyLogScore}
+\end{equation}
+where the traditional logscore is associated with a $w=0\%$.
+The modified logscore~($w>0$) awards models predictions that place high probability mass on ILI values within $w$ percentages points of the truth.
+Technically, this modified score is no longer proper, but in practice it may make little difference when evaluating models~\cite{gneiting2007strictly} and has the advantage of not penalizing models too heavily (placing no probability on the true ILI would result in a severely poor logscore of $-\infty$).
+Forecasts for $1$, $2$, $3$, $4$ are given a window of $w=0.5\%$ absolute percentage points, the CDC-accepted standard window.
+Both the proper ($w=0$) and modified ($w=0.5$) logscores were used to compare ensembles, proper logscores are included in the main text and modified logscores are present in the supplement~(Suppl.~\ref{suppl4.comparison})
+
+In practice, we bin our observed ILI and predictive probabilities from $0$ to $13\%$ by $0.1\%$, plus a single bin from $13\%$ to $100\%$.
+For the proper score, computing the logscore reduces to computing the log of the probability given to the single true ILI bin, and in the CDC modified case, summing the log probability given to the true ILI bin, 5 bins to the left and 5 bins to the right.
+% \begin{equation}
+%   \text{logscore}\l(p\r) = \sum_{b \in [i*-0.5,i*+0.5]} p(b) 
+% \end{equation}
+%where $p(b)$ represents the predictive probability the ILI percentage falls in bin $b$.
+Models that place high probabilities on the bins containing the observed ILIs are scored closer to $0$ (perfect score), while models that place low probabilities on observed ILI bins are scored closer to $-\infty$ (the worst score).
+In practice, logscores are truncated to -10, following convention from CDC FluSight scoring.\cite{mcgowan2019collaborative}
+%The log score judges a model's predictive probability, scoring a model equally uncertain about the future ILI rate better than a model that predicts, with absolute certainty, the wrong ILI rate.
+
+\subsection{Ensemble Framework}
+\subsubsection{Ensemble model specification}
+Static and adaptive ensemble algorithms use a mixture model to combine (or average) component models forecasts. 
+We developed two approaches to finding ensemble weights: a maximum likelihood method and a maximum aposteriori Bayesian approach. 
+A Bayesian approach lets us regularize our log likelihood via a prior, discouraging erratic shifts in our ensemble weights as we move, week-by-week through an influenza season.
+
+The model assumes our data---ILI percentage at time $t$ ($i_{t}$)---is generated by first sampling a component model $m$ with probability $\pi_m$, and second, sampling the ILI percentage from the component model $m$ with probability mass function $f_{m}(i)$. (In practice, the submitted probabilistic forecasts $f_{m}(i)$ are probability mass functions defined over discrete bins of possible ILI incidence. These are often discretized versions of empirical probability density functions.)
+While a mixture model is likely not the true generating process for ILI data, this framework conveniently expresses the probability distribution over possible ILI values as a convex combination of component models.
+This mixture model framework for probabilistic model averaging is the standard for the field~\cite{reich2019collaborative,ray2018prediction,brooks2018nonmechanistic}.
+We define the probability of observing an ILI percentage at time $t$,
+\begin{equation}
+%  \begin{aligned}
+     p(i_{t}|\pi) = \sum_{m=1}^{M} \pi_m f_{m}(i_{t}),
+%    & \text{subject to}\\
+%    & \dx \sum_{m=1}^{M} \pi_m = 1\\
+%    & \dx \pi_m \geq 0, m=11,2, \cdots, M,
+%  \end{aligned}
+\end{equation}
+requiring the $\pi$s are non-negative and sum to one.
+
+\subsubsection{Expectation-Maximization method for weight estimation}
+Though a convenient way to specify the model, the above probability makes computing the weights difficult, having to optimize the loglikelihood over all $T$ time points,
+\begin{equation}
+  \begin{aligned}
+    p(\mathcal{D} | \pi ) &= \prod_{t=1}^{T} \log\l[\sum_{m=1}^{M} \pi_m f_{m}(i_{t})\r],
+  \end{aligned}
+\end{equation}
+a product of log-sums, where $\mathcal{D}$ is the observed $T$ ILI percentages.
+An alternative and equivalent formulation~\cite{bishop2006pattern,murphy2012machine} introduces a set of hidden indicator variables~$z$---one for each week of data---that decide which component model (from $M$ possible models) was selected to generate data point $i_{t}$.
+The hidden variables $Z$ simplify the likelihood to
+\begin{equation}
+  \begin{aligned}
+    p(\mathcal{D},Z | \pi ) &= \prod_{t=1}^{T} \prod_{m=1}^{M} \l[\pi_m f_{m}(i_{t})\r]^{z(m,t)}\label{emLiklihood}
+  \end{aligned}
+\end{equation}
+where $z(m,t)$ equals $1$ when the $m^{\text{th}}$ model generated the $t^{\text{th}}$ ILI observation and $0$ otherwise, $Z$ is a $M \times T$ matrix of all these hidden variables.
+The Expectation-Maximization (EM) algorithm~\cite{dempster1977maximum,reich2019collaborativepnas}, by iteratively optimizing a lower \ngr{upper?} bound on~\eqref{emLiklihood}, the likelihood averaged over our $M \times T$ hidden variables ($z$), can find the most likely model weights given the data~(\textbf{deEM-MM} Fig.~\ref{algorithms} left); where the prefix \textbf{de} (degeneracy) refers to this algorithm's inability to change parameters inside component models and the suffix \textbf{MM} (mixture model) references the assumed data generating process.
+
+ 
+\subsubsection{Variational Inference for weight estimation}
+
+While the deEM-MM algorithm find an optimal set of weights, it considers $\pi$ a fixed vector of parameters.
+Assuming $\pi$ is a random variable, we can restructure our problem as Bayesian and infer a posterior probability over weights.
+Our Bayesian framework extends~\eqref{emLiklihood}, modeling the posterior probability of $\pi$
+\begin{equation}
+  p(\pi | Z, \mathcal{D}) \propto p(\pi) \times p(\mathcal{D},Z | \pi),
+\end{equation}
+multiplying the complete loglikelihood with a prior distribution, $p(\pi)$, over ensemble weights.
+While many different choices are available for a prior over ensemble weights, the Dirichlet distribution is a natural choice and conjugate to the likelihood.
+We further decided on a Dirichlet prior that has a single parameter~($\alpha$) shared across all $M$ models. 
+The scale of the shared parameter~($\alpha$) governs the influence of the prior distribution on the posterior.
+A larger value of $\alpha$ shrinks ensemble weights closer towards an equally weighted ensemble.
+Equal weights are a reasonable first choice for many ensemble settings.
+Smaller values allow the model to rely more heavily on the observed data. 
+
+Typically, the chosen prior is considered fixed. 
+However, in our setting, where the amount of data is growing and recent observations will be revised as we move through a season, we allow the prior to be time-dependent.
+This acts to continually weaken the influence of the data on the ensemble weights, allowing for the prior to exert a consistent pull towards equal-weighting across the entire season.
+
+We specify the prior as 
+\begin{align*}
+    \pi_{t} &\sim \text{Dir} \l[\alpha(t)\r]\\
+    p[\pi_{t} | \alpha(t)] &= \f{\Gamma \l[\sum \alpha(t) \r]}{\prod \Gamma\l[\alpha(t)\r]} \prod_{m=1}^{M}\pi_m^{\alpha(t)-1}
+\end{align*}
+where $\alpha(t)$ is the parameter (the same across all $M$ component models) that defines the Dirichlet distribution at time $t$.
+Choosing the prior to regularize the likelihood at a constant rate, we chose $\alpha(t)$ a constant fraction~($\rho$) of the number of observations available for fitting at timepoint $t$ divided equally amongst all $M$ component models.
+Defining the number of observations at time $t$ as $N(t)$ and constant fraction $\rho$, we defined our prior
+\begin{equation}
+  \alpha(t) = \rho \f{N(t)}{M}
+\end{equation}
+for $\rho$ between $0$ and $1$.
+Throughout the season, the prior parameter will grow linearly as the ensemble trains on an increasing number of observations.
+
+The prior defined as above, the posterior at time $t$ equals
+\begin{equation}
+  \begin{aligned}
+    p(\pi_{t} | Z, \mathcal{D}) &\propto p\l(\pi_{t}\r) \times p\l(\mathcal{D},Z | \pi_{t}\r)\\
+    &= \text{Dir}\l[\pi_{t} | \alpha(t)\r] \times p\l(\mathcal{D},Z | \pi_{t}\r) \label{bayesModel}.
+    %\log\l[ p(\pi_{t} | Z, \mathcal{D}) \r] &= + \log(p\l[\mathcal{D},Z | \pi(t)\r] )
+    %&= \f{\Gamma \l[\sum \alpha(m,t) \r]}{\prod \Gamma\l[\alpha(m,t)\r]} \prod_{m=1}^{M}\pi_m^{\alpha(m,t)-1}  \times \prod_{t=1}^{T} \prod_{m=1}^{M} \l[\pi_m f(m,i_{t})\r]^{z(m,t)}\\
+    %&= \f{\Gamma(\sum_{m}\alpha_{m})}{\prod_{m}\Gamma\l(\alpha_{m}\r)} \prod_{m=1}^{M} \pi_m^{\alpha_{m}-1} \prod_{t=1}^{T} \l[\pi_m f(m,i_{t})\r]^{z(m,t)}\\
+    %&= \f{\Gamma(\sum_{m}\alpha_{m})}{\prod_{m}\Gamma\l(\alpha_{m}\r)} \prod_{m=1}^{M} \pi_m^{\alpha_{m} + \sum_{t} z(m,t)-1} \prod_{t=1}^{T}  \l[f(m,i_{t})\r]^{z(m,t)}\\
+    %&\sim \text{Dir}\l[ \alpha + Z \times J \r]
+    %&= \text{Dir}(\pi | \alpha) \times \prod_{t=1}^{T} \prod_{m=1}^{M} \l[\pi_m f(m,i_{t})\r]^{z(m,t)}\\
+    %
+  \end{aligned}
+\end{equation}
+The finding an optimal set of mixture weights reduces to optimizing the following function of $\pi$ and $Z$,
+\begin{align}
+    \log p\l(\pi_{t}|Z,\mathcal{D}\r) \propto \sum_{t=1}^{T} \sum_{m=1}^{M} \mathbbm{1}\l[z(m,t)\r] \log\l[\pi_{mt}f(m,i_{t})\r] + \sum_{m=1}^{M} \l[\alpha(t)-1\r] \log \pi_{mt}. \label{eq:logposterior}
+\end{align}
+We note that the first term on the right-hand side of equation (\ref{eq:logposterior}) is the same as the frequentist expression for the likelihood shown in equation (\ref{emLiklihood}).  Intuitively, we expect a stronger (increasing $\rho$) even prior to encourage weights across components to move towards $1/M$, uniformly distributing probability mass to every component model.
+But the log-likelihood does not readily show how the prior influences the mixture weights. 
+% How the posterior weights are estimated will better describe how the prior and data interact.
+
+% \subsubsection{Optimization and algorithmic approach to finding mixture weights}
+
+Our variational inference algorithm~(\textbf{deVI-MM}) estimates the posterior probability over the mixture weights $\pi$ by iteratively maximizing a lower bound, similar to the EM algorithm.
+Both VI and EM algorithms can be motivated by introducing a distribution over hidden variables and decomposing the loglikehood into two parts: an expectation over a complete loglikelihood and an error term made by assuming the hidden variables take a specific probabilistic form. 
+Attempting to maximize our loglikelihood, given adjustable weights $\pi$ and fixed data $\mathcal{D}$, we first factor the complete likelihood
+\begin{equation*}
+  p(\mathcal{D},Z | \pi) = p(Z|\mathcal{D},\pi) p(\mathcal{D}|\pi).
+\end{equation*}
+Reordering terms and taking the log,
+\begin{equation*}
+  \log \l[ p(\mathcal{D} | \pi) \r] = \log \l[  \f{p(\mathcal{D}, Z | \pi)}{p(Z| \pi, \mathcal{D})}\r] \nonumber,
+\end{equation*}
+the marginal loglikelihood is expressed in terms of the complete loglikelihood (numerator) and distribution over hidden variables (denominator). 
+Not necessarily knowing the probability distribution over $Z$, we multiple and divide by an approximate distribution $q(Z)$,
+\begin{equation}
+  \log \l[ p(\mathcal{D} | \pi) \r] = \log \l[  \f{p(\mathcal{D}, Z | \pi)}{q(Z)} \times \f{q(Z)}{p(Z| \pi, \mathcal{D})}\r], \nonumber
+\end{equation}
+and integrate out $q(z)$ by taking the expected value with respect to $q$
+\begin{align}
+  \log \l[ p(\mathcal{D} | \pi) \r] &= \mathbbm{E}_{q} \l\{\log \l[  \f{p(\mathcal{D}, Z | \pi)}{q(Z)} \times \f{q(Z)}{p(Z| \pi, \mathcal{D})}\r]\r\} \nonumber \\
+   &= \mathbbm{E}_{q} \l\{ \log \l[  \f{p(\mathcal{D}, Z | \pi)}{q(Z)} \r] \r\} + \mathrm{KL} \l[q \| p(Z| \pi, \mathcal{D}) \r] \label{twoTerms}\\
+  \log \l[ p(\mathcal{D} | \pi) \r] - \mathrm{KL} \l[q \| p(Z| \pi, \mathcal{D}) \r]  &= \mathbbm{E}_{q} \l\{ \log \l[  \f{p(\mathcal{D}, Z | \pi)}{q(Z)} \r] \r\} \label{objFunc}
+\end{align}
+where $\mathrm{KL}$ is the Kullback-Leibler divergence~\cite{cover2012elements}, a non-negative function of $q$.
+Then the right-hand side, first expressed as an expectation plus error term~\eqref{twoTerms}, lower bounds the loglikelihood $p(\mathcal{D}|\pi)$ by only considering the expectation on the right hand side of \eqref{objFunc}. Iteratively optimizing this lower bound can be shown to monotonically improve the loglikelihood, converging on the best possible representation ($q$ and $\pi$) of the complete loglikelihood. 
+
+% The goal then is to choose a $q$ that minimizes this divergence and maximizes the quantity on the right hand side of the equals sign with respect to model parameters $\pi$.
+% The smaller the $\mathrm{KL}$, the better the quantity on the right of the equals sign approximates the true loglikelihood.
+
+From this decomposition, the EM and VI algorithms diverge: the EM algorithm chooses $q = p(Z|\pi,\mathcal{D})$, zeroing out the above Kullback-Leibler divergence but also assuming $p(Z | \pi, \mathcal{D})$ can be computed~(see~\cite{bishop2006pattern} for theoretical development and \cite{reich2019collaborativepnas} for an application to infectious disease forecasting).
+The VI algorithm is more general, allowing any choice of $q$.
+The mean-field approximation, the most common choice for $q$, factors $q$ into discrete pieces $q = \prod_{j}q_{j}(z)$~\cite{blei2017variational,rustagi1976variational} and is the approach we take.
+We chose to factor our distribution over hidden variables into a distribution over $Z$ and separate distribution over $\pi$, $q(\pi,Z) = q(Z) \cdot q(\pi)$, dividing indicator variables from mixture weights.
+
+This choice yields (see details in Supplement \ref{sec:appendixA}) a $q(\pi)$ that follows a Dirichlet distribution and indicator variable $z(m,t)$ that follows a Bernoulli distribution:
+\begin{align}
+    q(\pi)  &\sim \mathrm{Dir}\l( \alpha(t) + \sum_{t=1}^{T}  r(m,t)  \r) \label{dirSol}\\
+   q\l[z(m,t)\r] &\sim \mathrm{Bern}\l[ r(m,t) \r],
+\end{align}
+where the responsibility $r(m,t)$, or the probability that model $m$ generated datapoint $i_{t}$, equals
+\begin{equation}
+  r(m,t) = \dfrac{ \exp \l \{ \mathbbm{E}_{\pi} \log \l[ \pi_m \r] + \log \l[ f_{m}(i_{t}) \r] \r \} } {\sum_{m=1}^{M} \exp \l \{ \mathbbm{E}_{\pi} \log \l[ \pi_m \r] + \log \l[ f_{m}(i_{t}) \r] \r \}}
+\end{equation}
+and $E_{\pi}\log[\pi_m]$ equals $\psi(\gamma_{m}) - \psi\l(\sum_{m} \gamma_{m} \r)$, where $\psi$ is the digamma function.
+From $q\l[z(m,t)\r]$, we see the hidden variables computes the probability ILI value $i_{t}$ was generated by model $m$.
+
+The Variational approach here can also be interpreted as a generalization of the EM solution.
+Considering $\pi$ a fixed parameter, the responsibilities reduce to
+\begin{equation}
+  r(m,t) = \dfrac{\pi_mf_{m}(i_{t})}{\sum_{m=1}^{M} \pi_mf_{m}(i_{t}) },
+\end{equation}
+the same responsibility function for the EM algorithm~\cite{reich2019collaborativepnas}.
+VI and EM will find a unique global maximum of the log-likelihood due to the convexity of the log-likelihood function~(see analysis of convexity in Suppl.~\ref{convexity}).
+
+\subsubsection{How prior impacts ensemble weights}
+The prior can be recognized as a regularizer.
+With the posterior $q(\pi)$ Dirichlet distributed, the maximum aposteriori estimate (MAP) for the $m^{\text{th}}$ entry is computed directly by dividing the weight given to model $m$ by the sum over all weights (sum over $m$),
+\begin{equation*}
+  \text{MAP}\l[\pi_m\r] = \f{ \alpha(t) + \sum_{t=1}^{T}r(m,t)}{ \sum_{m}\alpha(t) + N(t) },
+\end{equation*}
+where $\sum_{m,t}r(m,t)=N(t)$ is the total number of ILI values used for training at time $t$.
+Though useful for computation, an alternative characterization expresses the MAP as a convex combination of the prior and empirical percentage.
+
+Defining the prior percent as $\alpha_{m}(t)/\sum_{m}\alpha_{m}(t)$ and the empirical percent as $\sum_{t}r(m,t)/N(t)$, the MAP of $\pi$ can be reexpressed as a convex combination of the prior plus empirical percent
+\begin{equation*}
+  \text{MAP}\l[\pi_m\r] = \l[ \f{\alpha(t)}{\sum_{m} \alpha(t)}\r](1-w) + w \l[\f{\sum_{t=1}^{T}r(m,t)}{N(t)}\r].
+\end{equation*}
+Where $w$ needs to be found so that this convex combination equals the original MAP estimate.
+Plugging in our prior $\alpha_{m}(t) = \rho N /M$, the weight $(w)$ equals $w = \dfrac{1}{1+\rho}$
+%\begin{equation*}
+%  w = \f{1}{1+\rho}
+%\end{equation*}
+and so the MAP equals 
+\begin{equation}
+  \text{MAP}\l[\pi_m\r] = \l[ \f{\alpha(t)}{\sum_{m} \alpha(t)}\r]\l(\f{\rho}{1+\rho}\r) + \l(\f{1}{1+\rho}\r) \l[\f{\sum_{t=1}^{T}r(m,t)}{N(t)}\r].
+\end{equation}
+Strengthening the prior, in our case increasing $\rho$, shifts the MAP estimate away from the data-estimated empirical percentage and towards the prior percentage.
+The constant shift, despite increased training data, is a result of our time-dependent prior.
+Setting our prior percentage to equal across all models in the ensemble $(1/M)$, the prior weighting $\rho$ interpolates between an equally-weighted ensemble (ignoring past model performance) and a completely data-driven weighting.
+
+
+% The prior's impact on model weights can be understood by studying the maximum aposteriori estimate (MAP) of $\pi$, the ensemble weights.
+% Since $q(\pi)$ is Dirichlet distributed, the MAP estimate for the $m^{\text{th}}$ entry is computed by dividing the weight give to model $m$ by the sum over all weights (sum over $m$),
+% \begin{equation}
+%   \text{MAP}(\pi[m]) = \f{ \alpha_{m}(t) + \sum_{t=1}^{T}r(m,t)}{ \sum_{m}\alpha_{m}(t) + N(t) },
+% \end{equation}
+% where $\sum_{m,t}r(m,t)=N(t)$ is the number of ILI values used for training at time $t$.
+% Substituting our choice for a prior, a constant percentage of the number of training observations,
+% \begin{equation}
+%   %\text{MAP}(\pi[m]) = \f{ \rho N(t) + \sum_{t=1}^{T}r(m,t)}{ M \rho N(t)+ N(t) },
+%   \text{MAP}(\pi[m]) = \f{ \rho N(t) + \sum_{t=1}^{T}r(m,t)}{ N(t)\l(1+\rho M\r) },
+% \end{equation}
+% Strengthening the prior will a more even distribution of ensemble weights, and in the limit as $\rho$ goes to infinity,
+% \begin{equation}
+%   \lim_{\rho \to \infty} \text{MAP}(\pi[m]) = \f{ \rho N(t)}{ \rho N(t) M } = \f{1}{M},
+% \end{equation}
+
+
+
+%The above choices of $q$ are all that we need, and can iteratively update and optimize our mixture weights, but we can also monitor our progress through an objective function called the Evidence Lower Bound~(ELBO; details in supplement).
+%\begin{equation}
+%  \mathrm{ELBO} =  \mathbbm{E}_{q} \log \l[ p(Z , \mathcal{D} | \pi ) \r] - \mathbbm{E}_{q} \log \l[ %q(Z)\r].
+%\end{equation}
+%Smaller and smaller improvements in the ELBO signal this model is converging.
+
+\subsubsection{deEM-MM and deVI-MM Algorithms}
+The striking algorithmic similarity between the EM and VI is shown below in Fig.\ref{algorithms}.
+Both algorithms rely on adding hidden variables to the loglikelihood and iteratively maximizing a lower bound.
+The key difference is how the EM and VI algorithms approximate the distribution over hidden variables $Z$.
+Comparing the EM and VI algorithms in detail, the majority of steps are the same, except for updating the hidden variables $Z$ (step $7$) and $\pi$ (step $10$). 
+When computing $Z$, both algorithms need the probability model $m$ generated data point $i$ for all models $1$ to $M$ and all data points $1$ to $T$. 
+Where they differ, the EM algorithm only requires the past ensemble weights, while the VI algorithm requires the ensemble weight's expectation~(see Suppl.~\ref{app.expec} for details on calculating $\mathbbm{E}[\pi]$).
+Another difference is in evaluating model fit.
+The EM algorithm computes the loglikelihood, log of \eqref{emLiklihood}, while the VI algorithm computes a related quantity called the Evidence Lower Bound (ELBO).
+The ELBO is defined as 
+\begin{equation}
+    \text{ELBO} = \text{loglikelihood} - \l\{\log[q(\pi)] + \log[q(Z)]\r\},
+\end{equation}
+or the difference between the loglikelihood and our approximation over hidden variables.
+When updating the ensemble weights, both algorithms sum over the hidden variable's probability data point $t$ belongs to model $m$, but the VI algorithm adds an additional term to the ensemble weight, the prior.
+
+\centerline{
+\begin{minipage}[th]{8cm}
+  \begin{algorithm}[H]
+    \label{deEM}
+    \caption{deEM-MM Algorithm}
+    \begin{algorithmic}[1]
+      \State input: $i_{1 \times T}$, $\pi_{0}$
+      \State output: $\pi$
+      \State
+      \State $\ell\ell \gets []$
+      \State$\pi_{M \times 1}$ = $\pi_{0}$
+      \For{j=1:maxIters}
+      \State $Z_{M \times T} \gets \pi \times f(i)$
+      \State $Z \gets Z/\text{colSum}(Z)$
+      % \State
+      \State $\pi \gets$ rowSum($Z$) 
+      \State $\pi \gets \pi/$ sum($\pi$)
+      % \State
+      \State $\ell\ell[j] \gets$ computeLL($i$,$\pi$)
+      \If{ LL[j] - LL[j-1] $<$ $\tau$}
+      \State break
+      \EndIf
+      \State return $\pi$
+      \EndFor
+  \end{algorithmic}
+\end{algorithm}
+\end{minipage}
+%
+\begin{minipage}[th]{8cm}
+  \begin{algorithm}[H]
+    \label{deviMM}
+    \caption{deVI-MM Algorithm}
+    \begin{algorithmic}[1]
+      \State input: $i_{1 \times T}$, $\pi_{0},\alpha_{M \times 1}$
+      \State output: $\pi$
+      \State
+      \State $\text{ELBO} \gets []$
+      \State$\pi_{M \times 1}$ = $\pi_{0}$
+      \For{j=1:maxIters}
+      \State $Z_{M \times T} \gets \exp\l( \mathbbm{E}\l( \log \pi\r) + \log f(i)\r)$
+      \State $Z \gets Z/ \text{colSum}(Z)$
+      % \State
+      \State $\pi \gets$ rowSum($Z$) 
+      \State $\pi \gets \pi/$ sum($\pi$) + $\alpha$
+      % \State
+      \State $\text{ELBO}[j] \gets$ computeELBO($i$,$\pi$)
+      \If{ ELBO[j] - ELBO[j-1] $<$ $\tau$}
+      \State break
+      \EndIf
+      \State return $\pi$
+      \EndFor
+    \end{algorithmic}
+  \end{algorithm}
+\end{minipage}
+}
+\captionof{figure}{
+  An Expectation maximization~(left) and Variational Inference~(right) algorithm estimating ensemble weights for a Frequentist and Bayesian adaptive algorithm.
+  Although both algorithms have different underlying probability models, they follow similar steps.
+  The major differences between EM and VI algorithms are: how $Z$ is computed (step $7$), the prior over $\pi$ (step $10$), and how weights are evaluated (steps $11$ and $12$).
+  ~\label{algorithms}}
+
+
+\subsection{Experimental design}
+
+Five ensemble models will be analyzed in detail~(Table.~\ref{tb.models}).
+The equally-weighted ({\bf EW}) ensemble weights all component models the same.
+The {\bf Static} ensemble trains on all past component model performance data, and assigns weights to component models before the next season.
+Weights are kept fixed throughout the next season.
+The adaptive model with three types of regularization will be studied: close to 0\% regularization ({\bf Adaptive$_{\text{non}}$}), `optimal' regularization ({\bf Adaptive$_{\text{opt}}$}), and `over' regularization ({\bf Adaptive$_{\text{over}}$}).
+We will consider our adaptive model `optimally' regularized by computing logscore statistics for the 2010/2011 season and choosing the prior that has the highest average logscore.
+
+%\ngr{add table with the five models compared: equal, static (no reg.), adaptive (no reg.), adaptive (optimal reg.), adaptive (over reg.)}
+\begin{table}[ht!]
+    \footnotesize
+    \begin{tabular}{lL}
+        \hline
+        Model & Description\\
+        \hline
+        Equally-weighted (EW)  & Assign a weight of $1/21$ to every component model               \\
+        Static with no regularization (Static) & Weights are trained on all previous seasons and kept fixed throughout the target season \\
+        Adaptive with no regularization (Adaptive$_{\text{non}}$) & Weights are trained within season, change week to week, and have a 0\% prior regularization. \\
+        Adaptive with optimal regularization (Adaptive$_{\text{opt}}$) & Weights are trained within season, change week to week, and have a optimal prior calculated from the 2010/2011 season.\\
+        Adaptive with over regularization (Adaptive$_{\text{over}}$) & Weights are trained within season, change week to week, and have a prior greater than the optimal\\
+        \hline
+    \end{tabular}
+    \caption{Description of the $5$ ensemble models analyzed.\label{tb.models}}
+\end{table}
+
+
+\subsubsection{Training and scoring component models for ensembles}
+
+Component models were scored on unrevised ILI data.
+We created a record of the component model scores, as if they had been scored in real time every week throughout each season.
+Log scores from all past weeks were updated each week based on ``current'' data.
+This means training data for adaptive ensembles fluctuated every week as performance fluctuated for component model forecasts.
+Ensemble log scores were calculated on ILI percentages from EW28, the ``final'' week used by the CDC FluSight challenges.
+ILI values at or after EW28 for each season are considered definitive.
+
+Based on previous work~\cite{reich2019collaborativepnas}, and due to the relatively smaller amount of data available to the adaptive ensemble, we chose to fit a  `constant weight' ensemble model for both the static and adaptive approaches. This formulation assigns a single weight to each component model, the weight does not vary by region or target.
+
+
+\subsubsection{Fitted ensemble models}
+
+For each season in 2010/2011 through 2017/2018, we computed adaptive ensembles for prior values from 1\% to 100\% by 1\% increments. 
+Static ensemble and equally-weighted ensembles were also fit at the beginning of each season, using only data for prior seasons.
+
+In order to determine a prespecified "optimal prior", we chose the prior corresponding to the highest average logscore in the 2010/2011 season.
+The 2010/2011 season was then removed from all formal comparisons between ensembles.
+The adaptive ensemble corresponding to the optimal prior was used for formal comparisons.
+
+\subsubsection{Formal Comparisons}
+
+The quantity of interest is the difference between the logscore assigned to one ensemble versus another.
+A random intercept model will describe the difference between logscores, averaged over epidemic weeks and paired by season, region, and target.
+\begin{align}
+    D_{w,s,r,t} &\sim \mathcal{N}\l( \beta_{0} + a_{s} + b_{r} + c_{t}, \sigma^{2} \r)\\
+    a_{s} &\sim \mathcal{N}\l(0,\sigma^{2}_{a}\r) \nonumber \\
+    b_{r} &\sim \mathcal{N}\l(0,\sigma^{2}_{b}\r) \nonumber \\
+    c_{t} &\sim \mathcal{N}\l(0,\sigma^{2}_{c}\r) \nonumber
+\end{align}
+where $D$ is the difference between logscores assigned to two ensembles: for epidemic week $w$, in season $s$, region $r$, and for target $t$. 
+The fixed intercept is denoted $\beta_{0}$, and season ($a_{s}$), region ($b_{r}$), and target ($c_{t}$) effects are Normally distributed ($\mathcal{N}$) with corresponding variances.
+
+We will fit two random effects models: one comparing the adaptive vs. equally-weighted ensemble, and the second comparing the adaptive vs. static ensemble.
+The conditional mean, 95\% confidence interval, and corresponding p-value will be reported.
+An additional bootstrapped p-value is also reported.
+Random samples (with replacement) are selected from the set of all season-region-target-epidemic week tuples.
+For every random sample, a random effects models is fit and conditional means collected for: seasons, regions, and targets. 
+The set of random samples, first centered, is compared to our original dataset's conditional mean.
+We report the empirical probability a randomly sampled exceeds our original dataset's conditional mean.
+
+\section{Results}
+
+\subsection{Choosing prior to maximize performance}
+
+We chose an optimal prior for the adaptive model by fitting an adaptive ensemble to the 2010/2011 season for priors from 0\% to 100\% by 1\%, and selecting the prior with the highest average logscore.
+The average logscore peaks at a prior of 8\%~(Fig.~\ref{fig2.prespecifiedLogScorePlot}), and we will consider an adaptive model with 8\% prior our adaptive$_{\text{opt}}$ ensemble.
+After a prior of 8\%, the logscore sharply decreases.
+This decrease in performance suggest ensemble weights are over regularized, and we chose a 20\% prior as our adaptive$_{\text{over}}$ ensemble.
+Finally, a 0\% prior was chosen as our adaptive$_{\text{non}}$ ensemble.
+
+\graphicspath{{../_6_TLGs/_G/fig2_logScoresFor20102011Training/}}
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[scale=0.60]{fig2_logScoresFor20102011Training}
+  \caption{ The logscore for the 2010/2011 season, averaged over region, target, and epidemic week for priors from 0\% to 100\% by 1\% increments.
+   The prior corresponding to the maximum logscore~(prior=8\%) was chosen as our adaptive$_{\text{opt}}$ ensemble for formal comparisons to static and equally weighted ensembles. \label{fig2.prespecifiedLogScorePlot}}
+\end{figure}
+
+\subsection{Prior successfully regularizes ensemble weights} 
+
+We compared the adaptive$_{\text{non}}$, adaptive$_{\text{opt}}$, and adaptive$_{\text{over}}$ ensembles ($\rho$ = 0.01, 0.08, and 0.20 respectively) to investigate how the ensemble weights change with the prior.
+Adding a prior regularizes component model weights~(Fig.~\ref{fig3.dorito}).
+Smaller priors yield higher variability in ensemble weights throughout any given season. 
+For example, in 2017/2018~(Fig.~\ref{fig3.dorito}), this is especially evident for the adaptive$_{\text{non}}$ ensemble, when ensemble weights vacillate between assigning almost all weight to one component model or another.
+The adaptive$_{\text{opt}}$ and adaptive$_{\text{over}}$ weights, in comparison, do not show as high variability over time.
+Component model weights for all three ensembles do track one another, with specific model weights moving up and down in unison, albeit in a more muted fashion for the stronger 8\% prior (adaptive$_{\text{opt}}$) and 20\% prior (adaptive$_{\text{over}}$).
+The patterns shown in~Fig.~\ref{fig3.dorito} persist in other seasons as well (see supplemental figure \ref{fig.bagOfDoritos}).
+
+\graphicspath{{../_6_TLGs/_G/fig3_triPlot/}}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[scale=0.70]{fig3_triPlotSeason_2017_2018}
+    \caption{
+    Component model weights plotted over epidemic weeks all ensembles during the 2017/2018 season. 
+    We highlight the weights for the two component models the adaptive$_{\text{non}}$ ensemble assigned the most weight to at the end of the season and compare this to the sum of all other model weights. 
+    (A) A simplex plot shows how, for each
+    % the adaptive$_{\text{non}}$ (red circle), adaptive$_\text{opt}$ (blue square), and adaptive$_\text{over}$ (green triangle) 
+    ensemble, the weights assigned to the top two models and the rest of the models move together across the season. 
+    The lines can be seen as a trajectory, beginning at the black pentagon (the equal-weight ensemble) and, following the arrows, migrate through the simplex with each point representing the triple $(\hat\pi_t^{(1)}, \hat\pi_t^{(2)}, \sum_{j=3}^M\hat\pi_t^{(j)})$ of weights estimated in week $t$. The estimated weights from the static ensemble using all data prior to 2017/2018 (but, unlike the adaptive ensemble, using no data from this season) are represented by the `x'.
+    Plots of $\hat\pi_t^{(1)}$ (panel B) and $\hat\pi_t^{(2)}$ (panel C) across all weeks $t$ in the 2017/2018 season. The estimates of this model's weight from the static ensemble and the equal weight (1/21) are shown in horizontal dashed lines.
+    (D) A plot of $\sum_{j=3}^M\hat\pi_t^{(j)}$ across weeks $t$. The estimates of the sum of these models' weights from the static ensemble and the equal weight (19/21) are shown in horizontal dashed lines.
+     \label{fig3.dorito}}
+\end{figure}
+
+
+
+\subsection{Comparing adaptive vs.~equally-weighted and static ensembles}
+
+\graphicspath{{../_6_TLGs/_G/fig4_logScoreGrid/}}
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[scale=0.75]{fig4_logScoreGrid}
+  \caption{
+    Logscore averaged over region and target for ensemble algorithms stratified by season.
+    The 8\% prior was pre-specified as the optimal prior based on analysis of the excluded 2010/2011 season.
+    %
+    All ensembles show variability in performance across seasons. 
+    Adaptive and static ensembles outperform the equal weighted ensemble, the adaptive and static ensemble showing similar performance.
+    %
+    Adaptive ensembles perform similar to static ensembles despite having less training data in later seasons.
+   \label{fig4.logScoresGrid}}
+\end{figure}
+Adaptive ensembles consistently outperform equally-weighted ensembles, and show comparable performance to static ensembles~(Fig.~\ref{fig4.logScoresGrid}).
+The adaptive$_{\text{opt}}$ model has higher logscores than either adaptive$_{\text{non}}$ and adaptive$_{\text{over}}$ models, and the EW model.
+The adaptive$_{\text{over}}$, unlike the adaptive$_{\text{non}}$ model, always outperforms the EW model, indicating it is better to over- than under-regularize, at least to some degree.
+The static model---trained on multiple seasons of data---performs the best. 
+Adaptivity improves over assigning equal weights to component models, but cannot outperform the data-rich static model. 
+
+\graphicspath{{../_6_TLGs/_G/fig5_pairedDifferenceInLogScores/}}
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[scale=0.75]{fig5_pairedDifferenceInLogScores}
+  \caption{
+    Logscores from equally-weighted, static, and adaptive ensembles are within season, region, target, and epidemic week.
+    Estimates and 95\% confidence intervals are plotted from two random intercepts models: modeling the difference in logscore between adaptive and equally-weighted ensembles and the second the difference between adaptive and static ensembles.
+    Positive differences suggest the adaptive ensemble performs better than the reference ensemble.
+    %
+    Adaptive ensembles outperform the equally-weighted ensembles.
+    Equally-weighted and adaptive ensembles do perform similarly in the 2012/2013 season.
+    Adaptive ensembles perform similar to static ensembles.
+    Differences in logscores favoring static or adaptive ensembles cannot obtain statistical significance for both parametric and bootstrapped p-values.
+    %
+    Adaptive ensembles consistently outperform equal-weighted ensembles, and show similar or slightly improved (but not significant) performance against static ensembles.
+    \label{fig5.pairedLogScoreDifferences}}
+\end{figure}
+
+Formal comparisons~(see Fig.~\ref{fig5.pairedLogScoreDifferences} and regression table in supplement~\ref{tbRegress}) demonstrate the adaptive$_{\text{opt}}$ ensemble has statistically higher logscores compared to the EW ensembles, and perform similarly to static ensembles.
+The adaptive$_{\text{opt}}$ ensemble does perform worse against the static models for particular seasons, regions, and targets.
+EW and adaptive$_{\text{opt}}$ ensembles perform similar for the 2012/2013 season.
+The 2015/2016, 2016/2017, and 2017/2018 season does show better (but not significant) performance for the static ensemble.
+This suggests that the static model's performance comes from training on multiple seasons of data.
+Differences in performance are less variable when stratified by region~(see Fig.~\ref{fig5.pairedLogScoreDifferences}B).
+Difference in logscores decrease as forecasting horizons increase.
+This reflects the difficulty in forecasting further into the future rather than ensemble performance.
+
+In select strata the adaptive ensemble shows a statistically significant higher logscore compared to the EW and close to signficiant difference compared to the static ensemble. 
+This significance is not enough to conclude the adaptive ensemble should outperform the static ensemble in most cases, however the data suggest, unsurprisingly, that the static ensemble performs relatively better the more data is has to train on.
+
+\subsection{The adaptive ensemble's ability to learn seasonal variation}
+
+The adaptive model has the opportunity to outperform the static model by tailoring component model weights within season.
+Training weights from component model performance data throughout the season is useful, as is shown by the adaptive$_{\text{opt}}$ model outperforming the EW model.
+But the adaptive ensemble must accrue several weeks of training data before it can perform similar, and in some cases better, than the static ensemble~(Fig.~\ref{fig6.logScoresOverEpidemicWeeks}).
+When this increase in adaptive performance occurs highlights two key points: (i) the adaptive ensemble is learning seasonal variation and (ii) the static model's better performance early in the season suggests some continuity between component model weights at the end of one season and beginning of the next.
+
+\graphicspath{{../_6_TLGs/_G/fig6_logScoresByEpidemicWeek/}}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[scale=0.70]{fig6_logScoresOverEpidemicWeeks}
+    \caption{
+    Average logscore over epidemic weeks stratified by target for adaptive$_{\mathrm{opt}}$ (blue solid line), static (orange dashed line), and EW (green dotted line) ensembles.
+    Across targets, all models perform better at the beginning and end of the season.
+    Performance decreases at approximately 10 weeks into the season, corresponding with peak ILI values.
+    Comparing ensembles, the adaptive$_{\mathrm{opt}}$ model performs better than the EW model at all time points, the difference between performance increasing throughout the season.
+    At the beginning of the season the adaptive$_{\mathrm{opt}}$ model performs worse than the static model, performing similar or better within 10 weeks. 
+    The $1$ week ahead target shows the adaptive$_{\mathrm{opt}}$ model outperforming the static model by week $10$.
+    The remaining targets show the adaptive$_{\mathrm{opt}}$ model performing similar to the static.
+    \label{fig6.logScoresOverEpidemicWeeks}}
+\end{figure}
+
+However, the adaptive models also are able to, without any prior data, learn how to create an optimal weighting within a season. 
+While the adaptive models may be penalized early on in a season by not possessing the historical knowledge of which models have performed well, they adjust for this by learning which models are performing well in a particular season. 
+This is illustrated clearly in Fig.~\ref{fig3.dorito} where the heaviest model at the end of the season (with \ngr{XX\%} of the weight) was assigned only \ngr{XX\%} of weight at the beginning of the season. 
+This ability to adapt to within-season dynamics appears to provide the adaptive$_{opt}$ model with a slight advantage over the static model in the middle and end of the season.
+
+\section{Discussion}
+
+We developed a new algorithm for assigning weights to component models.
+Our model extends a previous ensemble algorithm~\cite{reich2019collaborative} by assuming component model weights are random variables, rather than fixed quantities.
+This model reassigns new component model weights every week.
+But influenza data is prone to change within a season.
+For settings with sparse and possibly revisable data, we introduced a time-dependent uniform Dirichlet distribution that regularizes ensemble weights. 
+This adaptive ensemble outperforms an equally-weighted ensemble, and performs similarly to a static ensemble that requires multiple years of data to perform well.
+
+It is expected that learning from training data, and the amount available, would contribute to better predictive performance.
+The equally-weighted model ignores any training data, and similar to an adaptive ensemble with no training data, assigns equal weights.
+The equally-weighted ensemble performs worst.
+The next best model, the adaptive ensemble, trains on component model performance within the same season.
+Even though the static model has multiple seasons of training data available, and does have the best performance, the adaptive ensemble is not far behind.
+It is difficult to tell whether the similar performance is a shortcoming of the static or adaptive ensemble.
+Similar performance between ensembles could be because component model performance from past seasons (available to the static ensemble) does not generalize to future seasons.
+Alternatively, the adaptive ensemble may not be using the within-season training data efficiently, leaving behind hidden patterns in the component model data. 
+But we did find static weights outperforming the adaptive ensemble early on in the season.
+These results suggest a model could perhaps use the static ensemble weights, when available, as a prior for the adaptive ensemble.
+
+Regularizing ensemble weights increased adaptive ensemble performance.
+Not only can regularization improve adaptive model performance, but the static model too~(suppl~\ref{fig.staticHelp}).
+Improving performance by regularizing ensemble weights with a time-dependent uniform Dirichlet prior is not unique to an adaptive ensemble, but may be applicable to any ensemble weighting scheme. 
+
+Though our empirical work suggests an optimal prior near 8\%, we expect the optimal prior to vary by season, region, and target.
+Different priors will likely be optimal for different biological phenomena too.
+%
+A more flexible prior could improve adaptive ensemble performance:
+changing the prior percent throughout the season, allowing the prior to depend on performance data from past seasons, or modeling the prior on regional and target information.
+Instead of limiting the prior as a regularizer, we can include outside information from past seasons, or patterns in influenza data the ensemble cannot learn from training data.
+Future research will explore different methods of modeling prior ensemble weights.
+
+Our work here connects to Gneiting and other's work on linear pooling~\cite{ranjan2010combining,gneiting2013combining,geweke2011optimal,wallis2011combining}.
+% Like Gneiting, we measure performance using the logscore, a measure that guides our combined forecast towards assigning component model weights that lead to a calibrated and sharp forecast.
+Our weights are optimized with respect to the loglikelihood of a generative model, but the loglikelihood is really a different representation of a logscore---the log of the probability corresponding to weights $\pi$.  
+
+Unlike Gneiting, we did not recalibrate the combined predictive distributions, and methods like the beta transformed linear pool~\cite{ranjan2010combining} or shifted linear pool~\cite{kleiber2011locally} could improve predictive performance even further.
+
+This paper has many limitations future work can address: (i) better choice of prior, (ii) accounting for correlated component models, (iii) post-processing or `recalibrating' our combined forecast.
+Our adaptive ensemble examined how a prior can impact ensemble performance, but we only explored a uniform prior.
+Future work could study informative priors and how to manipulate priors during the course of a season to improve ensemble performance.
+Our model also assumed component models made independent forecasts.
+A more advanced ensemble would examine the correlation structure of the data~(region, target), and the component model forecasts.
+Finally, our ensemble model focused on an optimal set of weights for forecasting, and made no efforts to recalibrate the combined forecast.\cite{gneiting2013combining}
+
+From a public health perspective, officials have been moving away from stand-alone subjective decision making in favor of  incorporating data-driven analyses into decisions.
+This trend has become particularly apparent in infectious disease outbreak management.\cite{Rivers2019}
+Adaptive ensembles, providing real-time forecasts of infectious disease, supports this trend towards evidence based decision making for public health.
+Combining their expertise with statistical models like our adaptive ensemble, public health officials can work towards impeding outbreaks and changing public health policy.
+Public health officials often find themselves making decisions in the middle of crises, times when fast effective forecasting is necessary. 
+The adaptive ensemble's flexibility, reliance only on near-term data, and capacity to track unusual disease trends can support accelerated public health decision making.
+
+Adaptive ensembles---reweighting component models, week by week, throughout a season---can handle sparse data scenarios, admit new component models season by season, and shows similar prescience compared to the more data-heavy static ensemble.
+This added flexibility makes them an important tool for real-time, accurate forecasts.
+
+\clearpage
+\appendix
+
+\section{Computing $q(\pi)$ and $q(Z)$ for the Degenerate Variational Mixture model (deVI-MM)} \label{sec:appendixA}
+
+The functional forms for $q(Z)$ and $q(\pi)$ are computed.
+Readers interested in more details, and theoretical background, should consult~\cite{rustagi1976variational,blei2017variational,bishop2006pattern,murphy2012machine}.
+In particular, \cite{blei2017variational} gives a brief introduction to variational inference focused on the applied statistician, while \cite{bishop2006pattern,murphy2012machine} provide more theoretical details. 
+The most detailed material can be found in \cite{rustagi1976variational}.
+
+We find the $q(Z)$ and $q(\pi)$ that maximize the lower bound $\mathcal{L}(q)$ by taking advantage of our factored $q$ and using iterated expectations.
+\begin{align}
+  \mathcal{L}(q) = E_{\pi,Z} \l\{ \log\l[p(\mathcal{D},Z,\pi)\r] - \log[q(\pi)] - \log[q(Z)]\r\}
+\end{align}
+Maximizing $q(\pi$), we can take the iterated expectation
+\begin{align*}
+  \max_{q(\pi)} \mathcal{L}(q) =  &\max_{q(\pi)} E_{\pi|Z} E_{Z} \l\{ \log\l[p(\mathcal{D},Z,\pi)\r] - \log[q(\pi)] - \log[q(Z)]\r\}\\
+  &=\max_{q(\pi)} E_{\pi|Z}  \l\{ E_{Z}\log\l[p(\mathcal{D},Z,\pi)\r] - \log[q(\pi)]\r\}\\
+  %&=\max_{q(\pi)} - \text{KL}\l( q(\pi) ||  E_{Z}\log\l[p(\mathcal{D},Z,\pi)\r] \r)\\
+  &=\min_{q(\pi)} \text{KL}\l\{ \log q(\pi) ||  E_{Z}\log\l[p(\mathcal{D},Z,\pi)\r] \r\}\\
+\end{align*}
+The Kullback-Leibler divergence, taking values from 0 to $\infty$, is minimized when
+\begin{equation*}
+    \log q(\pi) = E_{Z}\log\l[p(\mathcal{D},Z,\pi)\r]
+\end{equation*}
+or when 
+\begin{equation*}
+   q(\pi) \propto \exp\l\{E_{Z}\log\l[p(\mathcal{D},Z,\pi)\r]\r\}.   
+\end{equation*}
+
+Maximizing $Z$ follows a similar pattern.
+The optimal hidden distributions of $q(\pi)$ and $q(Z)$ can then be computed
+\begin{align*}
+  q(\pi) &\propto \exp\l\{E_{Z}\log\l[p(D,Z,\pi)\r]\r\}\\
+  q(Z) &\propto \exp\l\{E_{\pi}\log\l[p(D,Z,\pi)\r]\r\}.
+\end{align*}
+
+We first compute $q(\pi)$, expanding the complete loglikelihood, taking the expectation over $Z$, and recognizing this expectation as a specific distribution.
+Here we don't explicitly describe $\pi$'s dependence on $t$ for convenience.
+\begin{align*}
+  \log q(\pi) &\propto \mathbbm{E}_{Z} \log \l[ p(D,Z,\pi)\r]\\
+              &= \sum_{t=1}^{T} \sum_{m=1}^{M}  \mathbbm{E} \l[z(m,t)\r] \log \l[ \pi_m f_{m}(i_{t}) \r] + \sum_{m=1}^{M} \l[\alpha(t)-1\r] \log(\pi_{m}) - \log \l\{\eta\l[\alpha(t)\r]\r\}\\
+              &= \sum_{t=1}^{T} \sum_{m=1}^{M}  \mathbbm{E} \l[z(m,t)\r] \log \l( \pi_m \r) + \sum_{m=1}^{M} \l[\alpha(t)-1\r] \log\l(\pi_m\r)\\
+              &= \sum_{m=1}^{M} \log \l( \pi_m \r)  \l\{ \alpha(t) + \sum_{t=1}^{T}  \mathbbm{E} \l[z(m,t)\r] - 1 \r\}\\
+              &= \sum_{m=1}^{M} \log \l( \pi_m \r)  \l\{ \alpha(t) + \sum_{t=1}^{T}  r(m,t) - 1 \r\},
+\end{align*}
+where $\eta$ is the normalizing constant for the Dirichlet distribution and $r(m,t)$ the expected value of the indicator variable $z_{m,t}$, the probability model $m$ generated the ILI value at time $t$.
+Studying the form of $\log q(\pi), $we recognize $\pi$ is Dirichlet distributed
+\begin{align*}
+  q(\pi) &\sim \mathrm{Dir}\l( \gamma \r)\\
+  \gamma\l[m\r] &= \alpha(t) + \sum_{t=1}^{T}  r(m,t)
+\end{align*}
+
+The same procedure can also be applied to compute $q(Z)$:
+\begin{align}
+  \log q(Z) &\propto \mathbbm{E}_{\pi} \log \l[ p(D,Z,\pi)\r] \nonumber \\
+            &=  \sum_{t=1}^{T} \sum_{m=1}^{M}  z(m,t) \l\{\mathbbm{E}_{\pi} \log \l( \pi_m \r) + \log \l[ f_{m}(i_{t}) \r]\r\} +  \mathbbm{E}_{\pi}\sum_{m=1}^{M} \l[\alpha(t)-1\r] \log(\pi_{m}) - \log\l[\eta(\alpha)\r] \nonumber \\
+            & \propto \sum_{t=1}^{T} \sum_{m=1}^{M}  z(m,t) \l\{ \mathbbm{E}_{\pi} \log \l[ \pi_m \r] + \log \l[ f_{m}(i_{t}) \r] \r\} \nonumber \\
+  q(Z_{t,m}) &\propto  \exp \l \{ \mathbbm{E}_{\pi} \log \l( \pi_m \r) + \log \l[ f_{m}(i_{t}) \r] \r \}  \label{notNorm},
+\end{align}
+and we recognize $q(Z_{t,m})$ is Bernoulli distributed, and with the additional constraint that all indicators must sum to one for every time period $(t)$, we see $Z_{t}$ is multinomial for every $t$. 
+\begin{align}
+  q(Z_{t,m}) &\sim \mathrm{Bern}\l[ r(m,t) \r]\\
+  r(m,t) &= \dfrac{ \exp \l \{ \mathbbm{E}_{\pi} \log \l( \pi_m \r) + \log \l[ f_{m}(i_{t}) \r] \r \} } {\sum_{m=1}^{M} \exp \l \{ \mathbbm{E}_{\pi} \log \l( \pi_m \r) + \log \l[ f_{m}(i_{t}) \r] \r \}}.
+\end{align}
+
+Although burdensome upfront, this approximate procedure drastically reduces computational time, compared to more intense monte carlo sampling techniques, and gives a good approximate answer, only assuming $Z$ and $\pi$ independent from one another.
+Also note this mixture model algorithm (both EM and VI), unlike a typical Gaussian mixture model, cannot manipulate the paramters control the component model distributions.
+But this inability to access the component model parameters opens up greater opportunities for other forecasters to submit models, requiring every forecast model to supply just 1, 2 ,3 , and 4 week ahead forecasts.
+
+\section{Computing $E\l[\log(\pi)\r]$}
+\label{app.expec}
+
+Variational inference over hidden variables $(Z,\pi)$ requires computing the expected value of the log of $\pi$'s, a natural consequence of adapting the Dirichlet distribution to exponential form.
+Exponential form rewrites a probability distribution in the form
+\begin{equation}
+  p\l[\pi|\eta(\alpha)\r] = h(\pi)e^{ \sum_{k} \eta_{k}(\alpha) T_{k}(\pi) - c(\eta)}.
+\end{equation}
+where $c(\pi)$ is a normalizing constant.
+Two facts about exponential form lead to an analytic formula for $E(\log \pi)$: taking the gradient of $c(\pi)$ and relating the set of sufficient statistics $T(\pi)$ with this expectation.
+Starting with the first fact.
+If $c(\pi)$ is a normalizing constant, then it must equal
+\begin{equation}
+  c(\eta) = \log \l( \int  h(\pi)e^{ \eta^{'}(\alpha)T(\pi)} \; d \pi  \r),
+\end{equation}
+and it's gradient must equal
+\begin{align}
+   \nabla_{\eta} \l[c(\eta)\r] &= \int T_{k}(\pi) \f{h(\pi)e^{ \eta^{'}(\alpha)T(\pi)}}{\int  h(\pi)e^{ \eta^{'}(\alpha)T(\pi) }} \; d \pi\\
+                &= \int T(\pi) p(\pi) = E[T(\pi)] .
+\end{align}
+A powerful consequence of exponential form, the gradient of the normalizing constant equals the expected value of the distribution's sufficient statistics.
+The Second fact.
+Working with the log likelihood of a distribution in exponential form, 
+\begin{equation}
+  \log \l[ \prod_{n=1}^{N} p(\pi|\alpha)\r] = N \log h(\pi) +  N \sum_{k} \eta_{k}(\alpha_{k})T_{k}(\pi) - N c(\pi),
+\end{equation}
+taking the gradient and setting equal to 0,
+\begin{align}
+  \nabla_{\eta} \log \l[ \prod_{n=1}^{N} p(\pi|\alpha)\r] &=  \sum T(\pi_{n}) - N \nabla c(\eta) = 0\\
+  \nabla c(\eta) &= E\l[ T(\eta) \r] = \f{1}{N} T(\pi).
+\end{align}
+The expected value of the distribution's sufficient statistics are equal to the gradient of $c(\eta)$.
+If the Dirichlet's sufficient statistics take the form $\log(\pi)$, then we only need to take the gradient of the normalizing constant to find an analytic expression.
+
+Looking at the Dirichlet distribution, the loglikelihood equals
+\begin{equation}
+  \log \l [ \prod p(\pi_{n}|\alpha) \r] = N \log \Gamma \l(\sum_{\alpha} \alpha_{k}\r) - N \sum_{k} \log \Gamma \l(\alpha_{k}\r) + N \sum_{k} (\alpha_{k}-1) \log(\pi_{k})
+\end{equation}
+the sufficient statistics for $\pi_{k}$ take the form $\log \l( \pi_{k}\r)$.
+Taking the gradient then will provide an analytic expression for computing the $\log \pi$'s expected value.
+\begin{equation}
+ \nabla_{\eta} \log \l [ \prod p(\pi_{n}|\alpha) \r] = N \psi \l(\sum_{\alpha} \alpha_{k}\r) - N \sum_{k} \psi \l(\alpha_{k}\r) + N \log(\pi_{k}),
+\end{equation}
+where $\psi$ is the digamma function.
+Then the expected value of $\log\l(\pi\r)$ equals a difference of digamma functions
+\begin{equation}
+  E\l[\pi_{k}\r] = \psi\l(\alpha_{k}\r) -  \psi \l(\sum_{\alpha} \alpha_{k}\r).
+\end{equation}
+This formula can be used to compute the responsibility function (see Algorithm $2$ step $7$).
+
+\clearpage
+
+\section{Convexity analysis}
+\label{convexity}
+
+The problem of finding an optimal set of mixture weights can be recast as a constrained optimization problem.
+Attempting to optimize a convex function over a convex set will prove a global optima exists, and showing strict convexity will prove the a unique vector obtains this optimum.
+
+The original problem searches for weights that maximize a loglikelihood whose sum is constrained to equal one,
+\begin{align}
+    &\text{max} \sum_{t=1}^{T} \log \l[ \sum_{m=1}^{M} \pi_mf_{m}(i_{t}) \r] \label{oFunc}\\
+    &\text{subject to} \nonumber \\ 
+    &   \sum_{m=1}^{M} \pi_{m} = 1 \nonumber,
+\end{align}
+and can be converted to a Langragian with a single constraint $(\lambda)$
+\begin{align}
+  \mathcal{L}(\pi,\lambda) = \sum_{t=1}^{T} \log \l[ \sum_{m=1}^{M} \pi_mf_{m}(i_{t}) \r]  +\lambda \l( \sum_{m=1}^{M} \pi_m-1 \r) \nonumber.
+\end{align}
+
+Knowing the solution $\pi$ needs to lie in the $M$ dimensional simplex, a convex set, we only need to show the above function~\eqref{oFunc} is convex.
+Given~~\eqref{oFunc} is differentiable at least twice, we will appeal to a second-order condition for convexity---proving the Hessian is positive semidefinite.
+After proving the Hessian is positive semidefinite, going further and showing the Hessian is in fact positive definite will prove a unique vector $\pi$ is a the global optimum of our objective function~\eqref{oFunc}.
+
+First, we compute the $m^{\text{th}}$ element of the gradient for \eqref{oFunc},
+\begin{align*}
+  \nabla_{\pi_m} f(\pi) = \sum_{t=1}^{T} \f{f_{m}(i_{i})}{\sum_{m=1}^{M} \pi_mf_{m}(i_{t}) }.
+\end{align*}
+Then the $(m,n)$ entry of the Hessian is
+\begin{align*}
+  H(m,n) = - \sum_{t=1}^{T} \f{ f_{m}(i_{t}) f_{n}(i_{t})}{ \l[\sum_{m=1}^{M} \pi_mf_{m}(i_{t})  \r]^{2} }.
+\end{align*}
+The Hessian is always negative, and if we minimized the negative loglikelihood (instead of maximizing the positive logelikihood) would see the Hessian is a positive semidefinite matrix.
+But we can prove more by rewriting $H$
+\begin{align*}
+ H = F'F,
+\end{align*}
+where the $[m,t]$ element
+\begin{equation*}
+  F[m,t] = \f{f_{m}(i_{t})}{\sum_{m=1}^{M}\pi_mf_{m}(i_{t})}.
+\end{equation*}
+Positive definite matrices can always be written as a transposed matrix times the matrix itself, and so $H$ must also be positive definite.
+Our convex optimization problem must then have a global optimum, attained by a unique vector $\pi$.
+The inability to change forecasting models is a limitation, but allows us to guarantee a global optima.
+When the component model parameters can also be updated, no such guarantee exists.
+
+
+\section{Simplex plots of all Seasons}
+\label{simplexplot}
+
+Regularizing the adaptive ensemble suppresses large swings in weight assignment, independent of season.
+The adaptive$_{\text{over}}$ ensemble stays closer to equal weighting throughout the season compared to the adaptive$_{\text{opt}}$ and adaptive$_{\text{non}}$ ensembles.
+If one exists, there is no strong relationship between the adaptive and static ensemble weighting.
+Some seasons~(2014/2015 and 2016/2017) show higher variability in weight assignment than others.
+The optimal weight assignments given data from all previous seasons (Static MLE) does not carry forward to the optimal weight assignment for the adaptive ensemble at the end of the current season.  
+
+\graphicspath{{../_6_TLGs/_G/fig7_setOfTriPlots/}}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics{fig7_setOfTriplots}
+    \caption{Component model weights for an adaptive ensemble with 1\% (non), 8\% (opt), and 20\% (over) priors plotted over epidemic week and stratified by season.
+    Equal weighting is represented by a pentagon and the Static ensemble weights represented by an X.
+    All ensembles start at an equal weighted triple of the 1st and 2nd highest weighted component model, and the sum of the remaining components at the end the season ($\pi_{t}^{(1)}$,$\pi_{t}^{2}$,$\sum_{j=3}^{M}\pi_{t}^{(j)}$), and move from week to week as new data is recieved and the adaptive ensemble re-estimates component model weight assignments.
+        \label{fig.bagOfDoritos}}
+\end{figure}
+
+
+\section{Tabulated comparisons of adaptive, static, and equal logscores}
+\label{tbRegress}
+
+The adaptive$_{\text{opt}}$ ensemble consistently outperforms the EW ensemble, and performs similarly to the static ensemble.
+When compared to the EW model, the adaptive cannot show statistical significance in the 2012/2013 season, but all differences are in the positive direction, favoring the adaptive model.
+The adaptive and static comparisons are more even.
+Some season, regions, and targets favor the static ensemble, others the adaptive model, but absolute differences are small.
+Despite markedly less data, the adaptive ensemble bests the EW ensemble and shows similar performance to the static.
+
+\begin{table}[ht!]
+  \begin{tabular}{lcrrcrr}
+    \hline
+     & \multicolumn{3}{c}{\textbf{Adaptive$_{\text{opt}}$ - EW}} & \multicolumn{3}{c}{\textbf{Adaptive$_{\text{opt}}$ - Static}}\\
+     & $\beta$ (95CI) & $p$ & $p_{\text{permutation}}$ & $\beta$ (95CI) & $p$ & $p_{\text{permutation}}$\\
+     \hline
+     
+  Season\\
+ \hspace{3mm} 2011/2012 & 0.13 (0.08, 0.19) & $<$0.01  &$<0.01$& 0.02 (-0.04, 0.08) &0.51&0.58\\
+ \hspace{3mm} 2012/2013	& 0.06 (0.00, 0.12) &0.04&0.21& 0.02 (-0.04, 0.08) &0.48&0.52\\
+ \hspace{3mm} 2013/2014	& 0.10 (0.04, 0.15) & $<$0.01  &0.04& 0.00 (-0.06, 0.06) &0.96&0.97\\
+ \hspace{3mm} 2014/2015	& 0.14 (0.09, 0.20) & $<$0.01  &$<0.01$& 0.03 (-0.03, 0.09) &0.30&0.36\\
+ \hspace{3mm} 2015/2016	& 0.13 (0.07, 0.18) & $<$0.01  &0.01& -0.02 (-0.08, 0.04) &0.54&1.00\\
+ \hspace{3mm} 2016/2017	& 0.11 (0.06, 0.17) & $<$0.01  &0.01& -0.04 (-0.10, 0.02) &0.20&1.00\\
+ \hspace{3mm} 2017/2018	& 0.21 (0.15, 0.26) & $<$0.01  &0.00& -0.01 (-0.06, 0.05) &0.86&1.00\\ 
+
+ Region\\    
+ \hspace{3mm}	HHS1 &  0.16 (0.11, 0.22) & $<$0.01  &$<0.01$& 0.01 (-0.05, 0.07) &0.80 &0.83\\
+ \hspace{3mm}	HHS2 &  0.11 (0.06, 0.17) & $<$0.01  &$<0.01$& -0.01 (-0.07, 0.06) &0.85&1.00\\
+ \hspace{3mm}	HHS3 &  0.13 (0.08, 0.18) & $<$0.01  &$<0.01$& 0.04 (-0.03, 0.10) &0.28&0.41\\
+ \hspace{3mm}	HHS4 &  0.12 (0.07, 0.17) & $<$0.01  &$<0.01$& -0.01 (-0.08, 0.05) &0.68&1.00\\
+ \hspace{3mm}	HHS5 &  0.13 (0.07, 0.18) & $<$0.01  &$<0.01$& -0.05 (-0.11, 0.01) &0.12&1.00\\
+ \hspace{3mm}	HHS6 &  0.12 (0.07, 0.18) & $<$0.01  &0.001& -0.04 (-0.11, 0.02) &0.17&1.00\\
+ \hspace{3mm}	HHS7 &  0.13 (0.08, 0.18) & $<$0.01  &$<0.01$& 0.05 (-0.01, 0.12) &0.09&0.20\\
+ \hspace{3mm}	HHS8 &  0.14 (0.09, 0.20) & $<$0.01  &$<0.01$& 0.00 (-0.06, 0.06) &0.99&1.00\\
+ \hspace{3mm}	HHS9 &  0.08 (0.02, 0.13) & $<$0.01  &0.01& 0.02 (-0.04, 0.08) &0.55&0.60\\
+ \hspace{3mm}	HHS10 & 0.12 (0.07, 0.17) & $<$0.01  &$<0.01$& -0.04 (-0.11, 0.02) &0.19&1.00\\
+ \hspace{3mm}	Nat	 &  0.13 (0.07, 0.18) & $<$0.01  &$<0.01$& 0.06 (-0.01, 0.12) &0.08&0.17\\
+
+ Target\\
+ \hspace{3mm}	1 week ahead	&   0.16 (0.11, 0.22) & $<$0.01  &$<0.01$& 0.06 (0.00, 0.11) &0.07&0.18\\
+ \hspace{3mm}	2 week ahead	&  0.13 (0.08, 0.19) & $<$0.01  &$<0.01$& -0.01 (-0.07, 0.05) &0.81&1.00\\
+ \hspace{3mm}	3 week ahead	&  0.11 (0.06, 0.17) & $<$0.01  &$<0.01$& -0.01 (-0.07, 0.05) &0.67&1.00\\
+ \hspace{3mm}	4 week ahead	&  0.09 (0.03, 0.14) & $<$0.01  &0.02& -0.03 (-0.09, 0.03) &0.35&1.00\\
+ \hline
+\end{tabular}
+
+\caption{
+Random effects regressions compared logscores between the adaptive$_{\text{opt}}$ vs equally-weighted and adaptive$_{\text{opt}}$ vs static ensembles.
+The model included an intercept, and separate random effect for: season, region, and target.
+The dependent variables is the difference in logscores paired by season-region-target-epidemic week.
+Conditional mean, 95\%CI, asymptotic, and a permutation based p-value are reported.}
+
+\end{table}
+
+
+\clearpage
+\section{Comparing ensembles with modified-logscore}
+\label{suppl4.comparison}
+
+All previous formal comparisons using the traditional logscore were re-computed using the modified-logscore.
+While the logscore is a proper scoring rule, the CDC has implemented a `modified' logscore.
+This score integrates a model's predictive density from 0.5 percentages points smaller to 0.5 percentage points higher than the true ILI value.
+This corresponds to a $w=5$ in equation~\ref{analyLogScore}.
+
+Formal comparisons made with the traditional logscore were recomputed with the modified logscore.
+Re-computing the statistics allows the CDC and other practitioners using the modified logscore to evaluate the adaptive ensemble results.
+
+Though the quantities change, the qualitative picture remains the same.
+The adaptive$_{\text{opt}}$ ensemble outperforms the EW ensemble and performs similar to the static ensemble.
+
+\graphicspath{{../_6_TLGs/_G/fig8_logScoreGrid_modifiedLogScore/}}
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[scale=0.75]{fig8_logScoreGrid_modifiedLogScore}
+  \caption{ Modified logscore averaged over region and target for ensemble algorithms stratified by season \label{fig8.logScoreGrid__modifiedLogScore}}
+\end{figure}
+
+\graphicspath{{../_6_TLGs/_G/fig9_pairedDifferenceInLogScores_modifiedLogScore/}}
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[scale=0.75]{fig9_pairedDifferenceInLogScores_modifiedLogScore}
+  \caption{Modified logscores compared between EW, adaptive, and static ensembles.  \label{fig9.pairedDifferenceInLogScores__modifiedLogScores}}
+\end{figure}
+
+\section{Regularization improves static ensemble}
+
+Regularizing ensemble weights improves both adaptive and static ensemble performance~(Fig.~\ref{fig.staticHelp}). 
+The static ensemble achieves peak performance with a smaller prior than the adaptive.
+This smaller prior reflects the data the static model is trained on. 
+Past seasons of finalized ILI data. 
+The adaptive model, finding peak performance for a larger prior, needs to account for the lack of training data and the revision-prone state of the data mid-season.
+
+\graphicspath{{../_6_TLGs/_G/fig10_logScoresForAllEnsembles/}}
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.60]{fig10_logScoresForAllEnsemble}
+    \caption{The average logscore for the equally-weighted ensemble, and adaptive, static ensembles for prior from 0\% to 100\% by 1\%.
+    The logscore is averaged over season, regiom, and target.
+    The highest average logscore corresponds to a larger prior than the static ensemble. But both the static and adaptive ensemble benefit from regularization.\label{fig.staticHelp}}
+\end{figure}
+
+\bibliographystyle{unsrt}
+\bibliography{ref}
+
+
+\end{document}
