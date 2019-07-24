@@ -3,9 +3,11 @@ Aggregate component model forecasts from the FluSightNetwork(FSN)
 
 ## Brief description
 
-This step in our analysis pipeline takes all the component forecasts from the FSN's [git repo](https://github.com/FluSightNetwork/cdc-flusight-ensemble) and creates a single csv file per component model forecast. 
+This step takes all the component forecasts from the FSN's [git repo](https://github.com/FluSightNetwork/cdc-flusight-ensemble) and creates a single csv file per component model forecast. 
 Raw component model forecast data is located in the `./cdc-flusight-ensemble/model-forecasts/component-models/` folder of the git repo, and should be downloaded to `./separateComponentModelForecasts/` .
 Aggregated and processed data is sent to `/aggregatedComponentForecasts/` and gzipped.
+Users can enter the command `make` to run this analysis 
+
 
 Among many processing steps, a variable called scoring week is added to all forecast datasets. 
 A scoring week is defined as the Epiweek (year and week) to evaluate a forecast against.

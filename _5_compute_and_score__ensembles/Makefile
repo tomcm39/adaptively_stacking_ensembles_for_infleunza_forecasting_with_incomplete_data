@@ -50,22 +50,22 @@ analysisData_preSeason/allEnsembleScores.csv: $(PREADSCORES)
 	$(PYTHON) $(PYTHON_OPTS) combineEnsembleScores.py --preSeason 1
 	$(call timeStamp,$(LOG),"combined all 2010/2011 ensemble weights")
 
-$(EWSCORES) $(EWWEIGHTS): $(_4)/analysisData/allFSNLogScores.csv.gz listOfPriors.txt
+$(EWSCORES) $(EWWEIGHTS): $(_4)/analysisData/allFSNLogScores.csv.gz
 	$(PYTHON) $(PYTHON_OPTS) process_EW.py
 	@echo "equal weight ensembles assigned a prior = -2"
 	$(call timeStamp,$(LOG),"produce EW ensemble data")
 
-analysisData/ensembleScores__staticweight_%.csv analysisData/ensembleScores__staticscore_%.csv: $(_4)/analysisData/allFSNLogScores.csv.gz listOfPriors.txt
+analysisData/ensembleWeights__staticweight_%.csv analysisData/ensembleScores__staticscore_%.csv: $(_4)/analysisData/allFSNLogScores.csv.gz listOfPriors.txt
 	PRIOR := $(shell echo $@ | grep -o '[0-9].[0-9]\+')
 	$(PYTHON) $(PYTHON_OPTS) process_static.py $(PRIOR)
 	$(call timeStamp,$(LOG),"produce static ensemble data")
 
-analysisData/ensembleScores__adaptweight_%.csv analysisData/ensembleScores__adaptscore_%.csv: $(_4)/analysisData/allFSNLogScores.csv.gz listOfPriors.txt
+analysisData/ensembleWeights__adaptweight_%.csv analysisData/ensembleScores__adaptscore_%.csv: $(_4)/analysisData/allFSNLogScores.csv.gz listOfPriors.txt
 	PRIOR := $(shell echo $@ | grep -o '[0-9].[0-9]\+')
 	$(PYTHON) $(PYTHON_OPTS) process_adaptive.py --preSeason 0 --prior $(PRIOR)
 	$(call timeStamp,$(LOG),"produce adaptive ensemble data")
 
-analysisData_preSeason/ensembleScores__adaptweight_%.csv analysisData_preSeason/ensembleScores__adaptscore_%.csv: $(_4)/analysisData/allFSNLogScores.csv.gz listOfPriors.txt
+analysisData_preSeason/ensembleWeights__adaptweight_%.csv analysisData_preSeason/ensembleScores__adaptscore_%.csv: $(_4)/analysisData/allFSNLogScores.csv.gz listOfPriors.txt
 	PRIOR := $(shell echo $@ | grep -o '[0-9].[0-9]\+')
 	$(PYTHON) $(PYTHON_OPTS) process_adaptive.py --preSeason 1 --prior $(PRIOR)
 	$(call timeStamp,$(LOG),"produce adaptive ensemble data for 2010/2011 season")
