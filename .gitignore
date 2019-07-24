@@ -1,0 +1,8 @@
+#latex extra files
+_7_manuscript/*.aux
+_7_manuscript/*.bbl
+_7_manuscript/*.blg
+_7_manuscript/*fdb_latexmk
+_7_manuscript/*.fls
+_7_manuscript/*.log
+_7_manuscript/*.el
