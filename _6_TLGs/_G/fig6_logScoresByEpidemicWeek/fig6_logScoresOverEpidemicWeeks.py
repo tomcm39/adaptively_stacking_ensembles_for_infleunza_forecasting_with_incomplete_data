@@ -57,30 +57,6 @@ def add1stHalgVs2ndHalf(d):
 
 if __name__ == "__main__":
  
-    # allWts = downloadWeightData()
-    # dynamic, static = allWts[allWts.modelType=='dynamic'], allWts[allWts.modelType=='static']
-
-    # dynamic['season'] = [fromEW2Season(x) for x in dynamic.week]
-    # static['season']  = [fromEW2Season(x) for x in static.week]
-
-
-    # static00 = static[static.prior==10**-5]
-    # dynamic00 = dynamic[dynamic.prior==10**-5]
-
-    # tDynamic = pd.melt(dynamic00, id_vars = ['season','week','modelType','prior'])
-    # tDynamic['logValue'] = np.log(tDynamic.value)
-
-    # tStatic = pd.melt(static00, id_vars = ['season','week','modelType','prior'])
-    # tStatic['logValue'] = np.log(tStatic.value)
-    
-
-    # def endOfSeason(rows):
-    #     return rows['value'].iloc[-1]
-    # tStaticEndOfSeason = tStatic.groupby(['variable','season']).apply(endOfSeason).reset_index()
-
-
-    #logDifs = pd.read_parquet('../plotDifferencesInLogScores/plotData/logDifs.pq')
-
     allLogScores = downloadData()
     allLogScores = addSeason(allLogScores)
 
@@ -113,6 +89,7 @@ if __name__ == "__main__":
     for n in np.arange(1,4+1):
         ax = fAxs[n-1]
         targetOnly = allModelsByEW[allModelsByEW.target=='{:d} wk ahead'.format(n)]
+        targetOnly = targetOnly[targetOnly.modelWeeks<=30]
 
         if n ==1:
             sns.lineplot(x='modelWeeks', y='logScore', hue='model', style='model', data = targetOnly, ax=ax, legend=False)

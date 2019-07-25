@@ -261,6 +261,7 @@ if __name__ == "__main__":
         n=0
         clrs = []
         ticks = []
+        modelnames = [r'adaptive$_{\mathrm{non}}$',r'adaptive$_{\mathrm{opt}}$',r'adaptive$_{\mathrm{over}}$']
         priors = [10**-5, 0.08,0.20]
         colors = ['r','b','g']
         sizes = [5,10,15]
@@ -270,7 +271,7 @@ if __name__ == "__main__":
         for (i,prior) in enumerate(priors):
             percent  = 100*prior
 
-            epidemicWeeks,pis = computePisAndWeeks(dynamic,prior,season2Models[season])
+            epidemicWeeks,pis = computePisAndWeeks(dynamic,prior,season2Models[season]); print(pis)
             n+=1./len(priors)
             ticks.append(n)
 
@@ -278,7 +279,7 @@ if __name__ == "__main__":
             ax=tax.ax
             arrowplot(axes=ax,x=list(xs),y=list(ys), color=colors[i], mutateSize=5, nArrs= 0.10*(len(xs)-1), markerStyle=mStyles[i],LS='-',alpha=alphas[i] )
             
-            ax.plot(-1,-1,'{:s}{:s}'.format(colors[i],mStyles[i]),label='prior = {:.2f}'.format(prior),alpha=alphas[i])
+            ax.plot(-1,-1,'{:s}{:s}'.format(colors[i],mStyles[i]),label='{:s} (prior = {:.2f})'.format(modelnames[i],prior),alpha=alphas[i])
             
         even = [1./21,1./21,1*(1.-2./21)]
         tax.scatter([even],marker='p',color='black', label = 'Equal Weighting',facecolors='none')

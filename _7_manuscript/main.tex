@@ -66,9 +66,9 @@
 \def\del#1{{\color{Green}\textbf{[#1]}}}
 \def\comment#1{{\color{red}\textbf{[Comment: #1]}}}
 
-\def\adaptNon#1{adaptive$_{\text{non}}$}
-\def\adaptOpt#1{adaptive$_{\text{opt}}$}
-\def\adaptOver#1{adaptive$_{\text{over}}$}
+\def\adaptNon{\textbf{adaptive$_{\text{non}}$ }}
+\def\adaptOpt{\textbf{adaptive$_{\text{opt}}$ }}
+\def\adaptOver{\textbf{adaptive$_{\text{over}}$ }}
 
 % misc functions 
 % ----------------------------------------
@@ -219,7 +219,8 @@ The FluSight Network (FSN) is a collaborative group of influenza forecasters tha
 Teams trained their models and generated forecasts as if their model had been applied in real-time across all seasons since $2010/2011$.
 The resulting collection of forecasts serves as a historical record of how each model would have performed in real-time.\cite{reich2019collaborativepnas}
 
-For the most recent $2018/2019$ season, $21$ `component' models with probabilistic forecasts were submitted as if they were forecasting in real-time, contending with ILI data revisions.\ngr{why are we talking about the 2018/2019 season here? should this be 2017/2018? you don't use any 2018/2019 data, right? maybe just delete this sentence? or maybe clarify whether the 2017/2018 forecasts you are using were actually made in real-time or were they made retrospectively? i can help you figure this out if it's not clear.}
+Probabilistic forecasts for $21$ `component' models were retrospectively submitted, as if they were forecasting in real-time, contending with ILI data revisions.
+%\ngr{why are we talking about the 2018/2019 season here? should this be 2017/2018? you don't use any 2018/2019 data, right? maybe just delete this sentence? or maybe clarify whether the 2017/2018 forecasts you are using were actually made in real-time or were they made retrospectively? i can help you figure this out if it's not clear.}
 
 For the CDC FluSight challenges, component forecast models and ensembles built from them, forecast $7$ key targets (Figure \ref{fig1.forecastingConcept}). These targets are $1$, $2$, $3$, $4$ week-ahead ILI percentages, onset week (defined as the week where $3$ consecutive weeks are above the CDC-specified baseline ILI percentage), the season peak week (the epidemic week with highest ILI percentage), and the season peak percentage (the highest ILI percentage throughout the season).
 The CDC cannot determine with certitude the start of the influenza season and when the peak occurs until mid-summer, due to continued revisions to data.
@@ -309,7 +310,7 @@ The hidden variables $Z$ simplify the likelihood to
   \end{aligned}
 \end{equation}
 where $z(m,t)$ equals $1$ when the $m^{\text{th}}$ model generated the $t^{\text{th}}$ ILI observation and $0$ otherwise, $Z$ is a $M \times T$ matrix of all these hidden variables.
-The Expectation-Maximization (EM) algorithm~\cite{dempster1977maximum,reich2019collaborativepnas}, by iteratively optimizing a lower \ngr{upper?} bound on~\eqref{emLiklihood}, the likelihood averaged over our $M \times T$ hidden variables ($z$), can find the most likely model weights given the data~(\textbf{deEM-MM} Fig.~\ref{algorithms} left); where the prefix \textbf{de} (degeneracy) refers to this algorithm's inability to change parameters inside component models and the suffix \textbf{MM} (mixture model) references the assumed data generating process.
+The Expectation-Maximization (EM) algorithm~\cite{dempster1977maximum,reich2019collaborativepnas}, by iteratively optimizing a lower  bound on~\eqref{emLiklihood}, the likelihood averaged over our $M \times T$ hidden variables ($z$), can find the most likely model weights given the data~(\textbf{deEM-MM} Fig.~\ref{algorithms} left); where the prefix \textbf{de} (degeneracy) refers to this algorithm's inability to change parameters inside component models and the suffix \textbf{MM} (mixture model) references the assumed data generating process.
 
  
 \subsubsection{Variational Inference for weight estimation}
@@ -402,7 +403,7 @@ The VI algorithm is more general, allowing any choice of $q$.
 The mean-field approximation, the most common choice for $q$, factors $q$ into discrete pieces $q = \prod_{j}q_{j}(z)$~\cite{blei2017variational,rustagi1976variational} and is the approach we take.
 We chose to factor our distribution over hidden variables into a distribution over $Z$ and separate distribution over $\pi$, $q(\pi,Z) = q(Z) \cdot q(\pi)$, dividing indicator variables from mixture weights.
 
-This choice yields (see details in Supplement \ref{sec:appendixA}) a $q(\pi)$ that follows a Dirichlet distribution and indicator variable $z(m,t)$ that follows a Bernoulli distribution:
+This choice yields (see details in Suppl. \ref{sec:appendixA}) a $q(\pi)$ that follows a Dirichlet distribution and indicator variable $z(m,t)$ that follows a Bernoulli distribution:
 \begin{align}
     q(\pi)  &\sim \mathrm{Dir}\l( \alpha(t) + \sum_{t=1}^{T}  r(m,t)  \r) \label{dirSol}\\
    q\l[z(m,t)\r] &\sim \mathrm{Bern}\l[ r(m,t) \r],
@@ -495,7 +496,7 @@ When updating the ensemble weights, both algorithms sum over the hidden variable
     \label{deEM}
     \caption{deEM-MM Algorithm}
     \begin{algorithmic}[1]
-      \State input: $i_{1 \times T}$, $\pi_{0}$
+      \State input: $i_{1 \times T}$, $\pi_{0}$, $\tau$
       \State output: $\pi$
       \State
       \State $\ell\ell \gets []$
@@ -522,7 +523,7 @@ When updating the ensemble weights, both algorithms sum over the hidden variable
     \label{deviMM}
     \caption{deVI-MM Algorithm}
     \begin{algorithmic}[1]
-      \State input: $i_{1 \times T}$, $\pi_{0},\alpha_{M \times 1}$
+      \State input: $i_{1 \times T}$, $\pi_{0},\alpha_{M \times 1}$, $\tau$
       \State output: $\pi$
       \State
       \State $\text{ELBO} \gets []$
@@ -560,7 +561,6 @@ Weights are kept fixed throughout the next season.
 The adaptive model with three types of regularization will be studied: close to 0\% regularization ({\bf Adaptive$_{\text{non}}$}), `optimal' regularization ({\bf Adaptive$_{\text{opt}}$}), and `over' regularization ({\bf Adaptive$_{\text{over}}$}).
 We will consider our adaptive model `optimally' regularized by computing logscore statistics for the 2010/2011 season and choosing the prior that has the highest average logscore.
 
-%\ngr{add table with the five models compared: equal, static (no reg.), adaptive (no reg.), adaptive (optimal reg.), adaptive (over reg.)}
 \begin{table}[ht!]
     \footnotesize
     \begin{tabular}{lL}
@@ -592,12 +592,14 @@ Based on previous work~\cite{reich2019collaborativepnas}, and due to the relativ
 
 \subsubsection{Fitted ensemble models}
 
-For each season in 2010/2011 through 2017/2018, we computed adaptive ensembles for prior values from 1\% to 100\% by 1\% increments. 
-Static ensemble and equally-weighted ensembles were also fit at the beginning of each season, using only data for prior seasons.
-
-In order to determine a prespecified "optimal prior", we chose the prior corresponding to the highest average logscore in the 2010/2011 season.
+We computed adaptive ensembles for prior values from 1\% to 100\% by 1\% increments for the 2010/2011 season.
+In order to determine a prespecified "optimal prior", we chose the prior corresponding to the highest average logscore.
 The 2010/2011 season was then removed from all formal comparisons between ensembles.
 The adaptive ensemble corresponding to the optimal prior was used for formal comparisons.
+
+For each season in 2010/2011 through 2017/2018, we computed \adaptNon, \adaptOpt, \adaptOver,  ensembles.
+Static ensemble and equally-weighted ensembles were also fit at the beginning of each season, using only data for prior seasons.
+
 
 \subsubsection{Formal Comparisons}
 
@@ -609,7 +611,7 @@ A random intercept model will describe the difference between logscores, average
     b_{r} &\sim \mathcal{N}\l(0,\sigma^{2}_{b}\r) \nonumber \\
     c_{t} &\sim \mathcal{N}\l(0,\sigma^{2}_{c}\r) \nonumber
 \end{align}
-where $D$ is the difference between logscores assigned to two ensembles: for epidemic week $w$, in season $s$, region $r$, and for target $t$. 
+where $D$ is the difference between logscores assigned to two ensembles: for epidemic week $w$, in season $s$, region $r$, and for target $t$.
 The fixed intercept is denoted $\beta_{0}$, and season ($a_{s}$), region ($b_{r}$), and target ($c_{t}$) effects are Normally distributed ($\mathcal{N}$) with corresponding variances.
 
 We will fit two random effects models: one comparing the adaptive vs. equally-weighted ensemble, and the second comparing the adaptive vs. static ensemble.
@@ -625,28 +627,28 @@ We report the empirical probability a randomly sampled exceeds our original data
 \subsection{Choosing prior to maximize performance}
 
 We chose an optimal prior for the adaptive model by fitting an adaptive ensemble to the 2010/2011 season for priors from 0\% to 100\% by 1\%, and selecting the prior with the highest average logscore.
-The average logscore peaks at a prior of 8\%~(Fig.~\ref{fig2.prespecifiedLogScorePlot}), and we will consider an adaptive model with 8\% prior our adaptive$_{\text{opt}}$ ensemble.
+The average logscore peaks at a prior of 8\%~(Fig.~\ref{fig2.prespecifiedLogScorePlot}), and we will consider an adaptive model with 8\% prior our \adaptOpt ensemble.
 After a prior of 8\%, the logscore sharply decreases.
-This decrease in performance suggest ensemble weights are over regularized, and we chose a 20\% prior as our adaptive$_{\text{over}}$ ensemble.
-Finally, a 0\% prior was chosen as our adaptive$_{\text{non}}$ ensemble.
+This decrease in performance suggest ensemble weights are over regularized, and we chose a 20\% prior as our \adaptOver ensemble.
+Finally, a 0\% prior was chosen as our \adaptNon ensemble.
 
 \graphicspath{{../_6_TLGs/_G/fig2_logScoresFor20102011Training/}}
 \begin{figure}[ht!]
   \centering
   \includegraphics[scale=0.60]{fig2_logScoresFor20102011Training}
   \caption{ The logscore for the 2010/2011 season, averaged over region, target, and epidemic week for priors from 0\% to 100\% by 1\% increments.
-   The prior corresponding to the maximum logscore~(prior=8\%) was chosen as our adaptive$_{\text{opt}}$ ensemble for formal comparisons to static and equally weighted ensembles. \label{fig2.prespecifiedLogScorePlot}}
+   The prior corresponding to the maximum logscore~(prior=8\%) was chosen as our \adaptOpt ensemble for formal comparisons to static and equally weighted ensembles. \label{fig2.prespecifiedLogScorePlot}}
 \end{figure}
 
 \subsection{Prior successfully regularizes ensemble weights} 
 
-We compared the adaptive$_{\text{non}}$, adaptive$_{\text{opt}}$, and adaptive$_{\text{over}}$ ensembles ($\rho$ = 0.01, 0.08, and 0.20 respectively) to investigate how the ensemble weights change with the prior.
+We compared the \adaptNon, \adaptOpt, and \adaptOver ensembles ($\rho$ = 0.01, 0.08, and 0.20 respectively) to investigate how the ensemble weights change with the prior.
 Adding a prior regularizes component model weights~(Fig.~\ref{fig3.dorito}).
 Smaller priors yield higher variability in ensemble weights throughout any given season. 
-For example, in 2017/2018~(Fig.~\ref{fig3.dorito}), this is especially evident for the adaptive$_{\text{non}}$ ensemble, when ensemble weights vacillate between assigning almost all weight to one component model or another.
-The adaptive$_{\text{opt}}$ and adaptive$_{\text{over}}$ weights, in comparison, do not show as high variability over time.
-Component model weights for all three ensembles do track one another, with specific model weights moving up and down in unison, albeit in a more muted fashion for the stronger 8\% prior (adaptive$_{\text{opt}}$) and 20\% prior (adaptive$_{\text{over}}$).
-The patterns shown in~Fig.~\ref{fig3.dorito} persist in other seasons as well (see supplemental figure \ref{fig.bagOfDoritos}).
+For example, in 2017/2018~(Fig.~\ref{fig3.dorito}), this is especially evident for the \adaptNon ensemble, when ensemble weights vacillate between assigning almost all weight to one component model or another.
+The \adaptOpt and \adaptOver weights, in comparison, do not show as high variability over time.
+Component model weights for all three ensembles do track one another, with specific model weights moving up and down in unison, albeit in a more muted fashion for the stronger 8\% prior (\adaptOpt) and 20\% prior (\adaptOver).
+The patterns shown in~Fig.~\ref{fig3.dorito} persist in other seasons as well (see Suppl.~\ref{simplexplot}).
 
 \graphicspath{{../_6_TLGs/_G/fig3_triPlot/}}
 \begin{figure}[ht!]
@@ -654,9 +656,9 @@ The patterns shown in~Fig.~\ref{fig3.dorito} persist in other seasons as well (s
     \includegraphics[scale=0.70]{fig3_triPlotSeason_2017_2018}
     \caption{
     Component model weights plotted over epidemic weeks all ensembles during the 2017/2018 season. 
-    We highlight the weights for the two component models the adaptive$_{\text{non}}$ ensemble assigned the most weight to at the end of the season and compare this to the sum of all other model weights. 
+    We highlight the weights for the two component models the \adaptNon ensemble assigned the most weight to at the end of the season and compare this to the sum of all other model weights. 
     (A) A simplex plot shows how, for each
-    % the adaptive$_{\text{non}}$ (red circle), adaptive$_\text{opt}$ (blue square), and adaptive$_\text{over}$ (green triangle) 
+    % the \adaptNon (red circle), adaptive$_\text{opt}$ (blue square), and adaptive$_\text{over}$ (green triangle) 
     ensemble, the weights assigned to the top two models and the rest of the models move together across the season. 
     The lines can be seen as a trajectory, beginning at the black pentagon (the equal-weight ensemble) and, following the arrows, migrate through the simplex with each point representing the triple $(\hat\pi_t^{(1)}, \hat\pi_t^{(2)}, \sum_{j=3}^M\hat\pi_t^{(j)})$ of weights estimated in week $t$. The estimated weights from the static ensemble using all data prior to 2017/2018 (but, unlike the adaptive ensemble, using no data from this season) are represented by the `x'.
     Plots of $\hat\pi_t^{(1)}$ (panel B) and $\hat\pi_t^{(2)}$ (panel C) across all weeks $t$ in the 2017/2018 season. The estimates of this model's weight from the static ensemble and the equal weight (1/21) are shown in horizontal dashed lines.
@@ -683,8 +685,8 @@ The patterns shown in~Fig.~\ref{fig3.dorito} persist in other seasons as well (s
    \label{fig4.logScoresGrid}}
 \end{figure}
 Adaptive ensembles consistently outperform equally-weighted ensembles, and show comparable performance to static ensembles~(Fig.~\ref{fig4.logScoresGrid}).
-The adaptive$_{\text{opt}}$ model has higher logscores than either adaptive$_{\text{non}}$ and adaptive$_{\text{over}}$ models, and the EW model.
-The adaptive$_{\text{over}}$, unlike the adaptive$_{\text{non}}$ model, always outperforms the EW model, indicating it is better to over- than under-regularize, at least to some degree.
+The \adaptOpt model has higher logscores than either \adaptNon and \adaptOver models, and the EW model.
+The \adaptOver, unlike the \adaptNon model, always outperforms the EW model, indicating it is better to over- than under-regularize, at least to some degree.
 The static model---trained on multiple seasons of data---performs the best. 
 Adaptivity improves over assigning equal weights to component models, but cannot outperform the data-rich static model. 
 
@@ -706,9 +708,9 @@ Adaptivity improves over assigning equal weights to component models, but cannot
     \label{fig5.pairedLogScoreDifferences}}
 \end{figure}
 
-Formal comparisons~(see Fig.~\ref{fig5.pairedLogScoreDifferences} and regression table in supplement~\ref{tbRegress}) demonstrate the adaptive$_{\text{opt}}$ ensemble has statistically higher logscores compared to the EW ensembles, and perform similarly to static ensembles.
-The adaptive$_{\text{opt}}$ ensemble does perform worse against the static models for particular seasons, regions, and targets.
-EW and adaptive$_{\text{opt}}$ ensembles perform similar for the 2012/2013 season.
+Formal comparisons~(see Fig.~\ref{fig5.pairedLogScoreDifferences} and regression table in Suppl.~\ref{tbRegress}) demonstrate the \adaptOpt ensemble has statistically higher logscores compared to the EW ensembles, and perform similarly to static ensembles.
+The \adaptOpt ensemble does perform worse against the static models for particular seasons, regions, and targets.
+EW and \adaptOpt ensembles perform similar for the 2012/2013 season.
 The 2015/2016, 2016/2017, and 2017/2018 season does show better (but not significant) performance for the static ensemble.
 This suggests that the static model's performance comes from training on multiple seasons of data.
 Differences in performance are less variable when stratified by region~(see Fig.~\ref{fig5.pairedLogScoreDifferences}B).
@@ -721,7 +723,7 @@ This significance is not enough to conclude the adaptive ensemble should outperf
 \subsection{The adaptive ensemble's ability to learn seasonal variation}
 
 The adaptive model has the opportunity to outperform the static model by tailoring component model weights within season.
-Training weights from component model performance data throughout the season is useful, as is shown by the adaptive$_{\text{opt}}$ model outperforming the EW model.
+Training weights from component model performance data throughout the season is useful, as is shown by the \adaptOpt model outperforming the EW model.
 But the adaptive ensemble must accrue several weeks of training data before it can perform similar, and in some cases better, than the static ensemble~(Fig.~\ref{fig6.logScoresOverEpidemicWeeks}).
 When this increase in adaptive performance occurs highlights two key points: (i) the adaptive ensemble is learning seasonal variation and (ii) the static model's better performance early in the season suggests some continuity between component model weights at the end of one season and beginning of the next.
 
@@ -742,7 +744,7 @@ When this increase in adaptive performance occurs highlights two key points: (i)
 
 However, the adaptive models also are able to, without any prior data, learn how to create an optimal weighting within a season. 
 While the adaptive models may be penalized early on in a season by not possessing the historical knowledge of which models have performed well, they adjust for this by learning which models are performing well in a particular season. 
-This is illustrated clearly in Fig.~\ref{fig3.dorito} where the heaviest model at the end of the season (with \ngr{XX\%} of the weight) was assigned only \ngr{XX\%} of weight at the beginning of the season. 
+This is illustrated clearly in Fig.~\ref{fig3.dorito} where the heaviest model at the end of the season (with 46.2\% of the weight for the \adaptOpt ensemble) was assigned only 4.82\% of weight at the beginning of the season. 
 This ability to adapt to within-season dynamics appears to provide the adaptive$_{opt}$ model with a slight advantage over the static model in the middle and end of the season.
 
 \section{Discussion}
@@ -766,7 +768,7 @@ But we did find static weights outperforming the adaptive ensemble early on in t
 These results suggest a model could perhaps use the static ensemble weights, when available, as a prior for the adaptive ensemble.
 
 Regularizing ensemble weights increased adaptive ensemble performance.
-Not only can regularization improve adaptive model performance, but the static model too~(suppl~\ref{fig.staticHelp}).
+Not only can regularization improve adaptive model performance, but the static model too~(Suppl.~\ref{fig.staticHelp}).
 Improving performance by regularizing ensemble weights with a time-dependent uniform Dirichlet prior is not unique to an adaptive ensemble, but may be applicable to any ensemble weighting scheme. 
 
 Though our empirical work suggests an optimal prior near 8\%, we expect the optimal prior to vary by season, region, and target.
@@ -970,7 +972,7 @@ When the component model parameters can also be updated, no such guarantee exist
 \label{simplexplot}
 
 Regularizing the adaptive ensemble suppresses large swings in weight assignment, independent of season.
-The adaptive$_{\text{over}}$ ensemble stays closer to equal weighting throughout the season compared to the adaptive$_{\text{opt}}$ and adaptive$_{\text{non}}$ ensembles.
+The \adaptOver ensemble stays closer to equal weighting throughout the season compared to the \adaptOpt and \adaptNon ensembles.
 If one exists, there is no strong relationship between the adaptive and static ensemble weighting.
 Some seasons~(2014/2015 and 2016/2017) show higher variability in weight assignment than others.
 The optimal weight assignments given data from all previous seasons (Static MLE) does not carry forward to the optimal weight assignment for the adaptive ensemble at the end of the current season.  
@@ -989,7 +991,7 @@ The optimal weight assignments given data from all previous seasons (Static MLE)
 \section{Tabulated comparisons of adaptive, static, and equal logscores}
 \label{tbRegress}
 
-The adaptive$_{\text{opt}}$ ensemble consistently outperforms the EW ensemble, and performs similarly to the static ensemble.
+The \adaptOpt ensemble consistently outperforms the EW ensemble, and performs similarly to the static ensemble.
 When compared to the EW model, the adaptive cannot show statistical significance in the 2012/2013 season, but all differences are in the positive direction, favoring the adaptive model.
 The adaptive and static comparisons are more even.
 Some season, regions, and targets favor the static ensemble, others the adaptive model, but absolute differences are small.
@@ -1033,7 +1035,7 @@ Despite markedly less data, the adaptive ensemble bests the EW ensemble and show
 \end{tabular}
 
 \caption{
-Random effects regressions compared logscores between the adaptive$_{\text{opt}}$ vs equally-weighted and adaptive$_{\text{opt}}$ vs static ensembles.
+Random effects regressions compared logscores between the \adaptOpt vs equally-weighted and \adaptOpt vs static ensembles.
 The model included an intercept, and separate random effect for: season, region, and target.
 The dependent variables is the difference in logscores paired by season-region-target-epidemic week.
 Conditional mean, 95\%CI, asymptotic, and a permutation based p-value are reported.}
@@ -1054,7 +1056,7 @@ Formal comparisons made with the traditional logscore were recomputed with the m
 Re-computing the statistics allows the CDC and other practitioners using the modified logscore to evaluate the adaptive ensemble results.
 
 Though the quantities change, the qualitative picture remains the same.
-The adaptive$_{\text{opt}}$ ensemble outperforms the EW ensemble and performs similar to the static ensemble.
+The \adaptOpt ensemble outperforms the EW ensemble and performs similar to the static ensemble.
 
 \graphicspath{{../_6_TLGs/_G/fig8_logScoreGrid_modifiedLogScore/}}
 \begin{figure}[ht!]
