@@ -17,6 +17,7 @@ from matplotlib.patches import Rectangle
 from matplotlib.patches import ConnectionPatch
 from matplotlib.patches import Patch
 
+
 import seaborn as sns
 
 
@@ -75,6 +76,7 @@ from matplotlib.patches import Rectangle
 def downloadIliData():
     return pd.read_csv('../../../_2_processRawILIdata/analysisData/allFluData__releaseDate_location_EW_lag_ili_wili_year_week_modelWeek_calendarEW_Season.csv')
 
+
 def diagonal(ax,color,downUp):
     if downUp:
         slope=-1
@@ -103,6 +105,7 @@ if __name__ == "__main__":
             axes[column].append(ax)
 
             subsetIli = iliData[iliData.Season==column2Season[column]]
+            #mostRecentCalender = max(subsetIli.calendarEW)
             mostRecentIli = subsetIli.groupby(['region','EW']).apply( lambda x: x.iloc[-1]  ) 
             avgIli = mostRecentIli.groupby(['EW']).apply( lambda x: pd.Series({'wili':np.mean(x.wili)}) ).reset_index()
             ax.plot(avgIli.wili.values,'k-')
@@ -122,6 +125,7 @@ if __name__ == "__main__":
                 l=[Patch(facecolor='white',edgecolor='brown',hatch=r"xxxx",label='Train & Predict')]
                 ax.legend(handles=l,frameon=False,loc='center left', bbox_to_anchor = (0.00,-1.5),fontsize=8.0)
 
+                
             if column == 0:
                 if row == 2:
                     ax.text(-0.1,0.50,'Equal',ha='right',va='center',transform=ax.transAxes)
@@ -133,15 +137,18 @@ if __name__ == "__main__":
                 if column < 8:
                     ax.set_facecolor('white')
                 elif column ==8:
+                    #ax.set_facecolor((1.0,0.0,0.0))
                     diagonal(ax,'r',1)
 
                 else:
                     ax.set_facecolor('white')
             if row ==3:
                 if column < 8:
+                    #ax.set_facecolor((0,1,0,0.50))
                     diagonal(ax,'g',0)
                 elif column ==8:
                     diagonal(ax,'r',1)
+                    #ax.set_facecolor((1.0,0.0,0.0))
                 else:
                     ax.set_facecolor('white')
             if row ==4:
@@ -149,6 +156,7 @@ if __name__ == "__main__":
                 if column < 8:
                     ax.set_facecolor('white')
                 elif column ==8:
+                    #ax.set_facecolor((1.0,1.0,0.0))
                     diagonal(ax,'r',1)
                     diagonal(ax,'g',0)
                 else:
@@ -156,11 +164,13 @@ if __name__ == "__main__":
 
                    
     ax = plt.subplot(gs[0,:])
-    d = downloadIliData()
+    d = pd.read_csv('../../../_2_processRawILIdata/analysisData/allFluData__releaseDate_location_EW_lag_ili_wili_year_week_modelWeek_calendarEW_Season.csv')
     season20152016 = d.loc[(d.Season=='2015/2016') & ( d.calendarEW==201640) & (d.EW <= 201620) & (d.region=='Nat') ]
-    
+    season20152016 = season20152016.sort_values('modelWeek')
+
     ax.plot( season20152016.modelWeek, season20152016.wili, 'k-', label ='' )
     ax.set_ylabel('Weighted ILI, as of 2016-10-07 (%)')
+    #ax.set_xlabel('Epidemic week (2015/2016 Season)')
     
     timePoint = 53
     _1wk = float(season20152016.loc[ season20152016.modelWeek == timePoint-1, 'wili' ])
@@ -207,6 +217,7 @@ if __name__ == "__main__":
     
     ax.set_ylim(min(wilis),4.0)
     ticksIn(ax,2.)
+    #boldAnnot(ax,x=0.99,y=0.99,txt='C.',ha='right',va='top',size=12)
 
     wili = float(season20152016.loc[season20152016.modelWeek==timePoint,'wili'])
     ax.plot([timePoint, timePoint], [1.30,_2wk-0.073], 'b--')
@@ -231,7 +242,7 @@ if __name__ == "__main__":
     fig = plt.gcf()
     fig.set_size_inches(mm2Inch(183),mm2Inch(183)/1.6)
 
-    plt.savefig('./fig1_conceptDiagram.pdf')
-    plt.savefig('./fig1_conceptDiagram.png')
-    plt.savefig('./fig1_conceptDiagram.eps')
+    plt.savefig('./conceptDiagram.pdf')
+    plt.savefig('./conceptDiagram.png')
+    plt.savefig('./conceptDiagram.eps')
     plt.close()
