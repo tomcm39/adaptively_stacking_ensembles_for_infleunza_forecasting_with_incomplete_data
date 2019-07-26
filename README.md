@@ -46,11 +46,13 @@ Adaptive ensembles are able to quickly train and forecast during epidemics, and 
 
 Data needed for this project can be found at the Harvard Dataverse.
  
-allFSNLogScores.csv.gz (https://doi.org/10.7910/DVN/YUYFUF) can be downloaded `wget https://dataverse.harvard.edu/api/access/datafile/3477302` and placed in the folder \_4\_score\_component\_model\_forecasts/analysisData/
+allFSNLogScores.csv.gz (https://doi.org/10.7910/DVN/YUYFUF) can be downloaded `wget https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/YUYFUF` and placed in the folder \_4\_score\_component\_model\_forecasts/analysisData/
 
-analysisData/allEnsembleScores.csv (https://doi.org/10.7910/DVN/RJE9PT) can be downloaded `wget https://dataverse.harvard.edu/api/access/datafile/3477307` and placed in the folder \_5\_compute\_and\_score\_\_ensembles/analysisData
+analysisData/allEnsembleScores.csv (https://doi.org/10.7910/DVN/RJE9PT) can be downloaded `wget https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/RJE9PT -O allEnsembleScores.csv` and placed in the folder \_5\_compute\_and\_score\_\_ensembles/analysisData
 
-analysisData/allEnsembleWeights.csv (https://doi.org/10.7910/DVN/A9YZOV) can be downloaded `wget https://dataverse.harvard.edu/api/access/datafile/3477309` and placed in the folder \_5\_compute\_and\_score\_\_ensembles/analysisData
+analysisData/allEnsembleWeights.csv (https://doi.org/10.7910/DVN/A9YZOV) can be downloaded `wget https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/A9YZOV -O allEnsembleWeights.csv` and placed in the folder \_5\_compute\_and\_score\_\_ensembles/analysisData
 
-analysisData_preSeason/allEnsembleScores.csv (https://doi.org/10.7910/DVN/GH3C1U) can be downloaded `wget https://dataverse.harvard.edu/api/access/datafile/3477311` and placed in the folder \_5\_compute\_and\_score\_\_ensembles/analysisData
+analysisData_preSeason/allEnsembleScores.csv (https://doi.org/10.7910/DVN/GH3C1U) can be downloaded `wget https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/GH3C1U -O allEnsembleScores.csv` and placed in the folder \_5\_compute\_and\_score\_\_ensembles/analysisData
+
+ \_2\_processRawILIdata/analysisData/allFluData\_\_releaseDate\_location\_EW_lag\_ili\_wili\_year\_week_modelWeek\_calendarEW\_Season.csv (https://doi.org/10.7910/DVN/BNVXN6) can be downloaded `wget https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/BNVXN6/Q56PMZ -O allFluData__releaseDate_location_EW_lag_ili_wili_year_week_modelWeek_calendarEW_Season.csv` and placed in the folder \_2\_processRawILIdata/analysisData/
 
