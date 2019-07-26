@@ -17,16 +17,19 @@ Aggregate all raw influenza data into one file.
 Combine component model forecasts together.
 
 \_4\_score\_component\_model\_forecasts ->
-Score component model forecasts
+Score component model forecasts.
 
 \_5\_compute\_and\_score\_\_ensembles ->
-Score ensemble model forecasts
+Score ensemble model forecasts.
 
 \_6\_TLGs ->
-Create tables and figures for publication
+Create tables and figures for publication.
 
 \_7\_manuscript ->
-Code for generating manuscript
+Code for generating manuscript.
+
+\_data\_dictionary ->
+Data dictionary for datasets published on Harvard dataverse.
 
 ## abstract
   Seasonal influenza infects between 10 and 50 million people in the United States every year, overburdening hospitals during weeks of peak incidence.
