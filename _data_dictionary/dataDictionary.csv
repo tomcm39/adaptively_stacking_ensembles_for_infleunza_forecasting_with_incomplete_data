@@ -1,0 +1,75 @@
+﻿dataset,doi,variable,description
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,region,"HHS reporting region (HHS1-HHS10, and National)"
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,calendarEW,"The Calendar week (format=YYYYWW;Y=year,W=week)"
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,target,"Forecasting target (1 wk ahead, 2 wk ahead, 3 wk ahead, 4 wk ahead)"
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,EWNum,"Epidemic Week (format=YYYYWW;Y=year,W=week)"
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,CU-BMA,Logscores for the CU-BMA model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,CU-EAKFC_SEIRS,Logscores for the CU-EAKFC_SEIRS model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,CU-EAKFC_SIRS,Logscores for the CU-EAKFC_SIRS model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,CU-EKF_SEIRS,Logscores for the CU-EKF_SEIRS model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,CU-EKF_SIRS,Logscores for the CU-EKF_SIRS model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,CU-RHF_SEIRS,Logscores for the CU-RHF_SEIRS model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,CU-RHF_SIRS,Logscores for the CU-RHF_SIRS model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,Delphi-BasisRegression,Logscores for the Delphi-BasisRegression model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,Delphi-DeltaDensity1,Logscores for the Delphi-DeltaDensity1 model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,Delphi-DeltaDensity2,Logscores for the Delphi-DeltaDensity2 model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,Delphi-EmpiricalFuture,Logscores for the Delphi-EmpiricalFuture model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,Delphi-EmpiricalTraj,Logscores for the Delphi-EmpiricalTraj model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,Delphi-Uniform,Logscores for the Delphi-Uniform model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,LANL-DBMplus,Logscores for the LANL-DBMplus model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,Protea Analytics-Cheetah,Logscores for the Protea Analytics-Cheetah model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,Protea Analytics-Kudu,Logscores for the Protea Analytics-Kudu model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,Protea Analytics-Springbok,Logscores for the Protea Analytics-Springbok model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,ReichLab-KCDE,Logscores for the ReichLab-KCDE model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,ReichLab-KDE,Logscores for the ReichLab-KDE model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,ReichLab-SARIMA1,Logscores for the ReichLab-SARIMA1 model
+allFSNLogScores.csv.gz,https://doi.org/10.7910/DVN/YUYFUF,ReichLab-SARIMA2,Logscores for the ReichLab-SARIMA2 model
+analysisData/allEnsembleScores.csv,https://doi.org/10.7910/DVN/RJE9PT,modelType,static or dynamic (dynamic = adaptive)
+analysisData/allEnsembleScores.csv,https://doi.org/10.7910/DVN/RJE9PT,region,"HHS reporting region (HHS1-HHS10, and National)"
+analysisData/allEnsembleScores.csv,https://doi.org/10.7910/DVN/RJE9PT,target,"Forecasting target (1 wk ahead, 2 wk ahead, 3 wk ahead, 4 wk ahead)"
+analysisData/allEnsembleScores.csv,https://doi.org/10.7910/DVN/RJE9PT,EWNum,"Epidemic Week (format=YYYYWW;Y=year,W=week)"
+analysisData/allEnsembleScores.csv,https://doi.org/10.7910/DVN/RJE9PT,logScore,Traditional logscore
+analysisData/allEnsembleScores.csv,https://doi.org/10.7910/DVN/RJE9PT,logScore5,"Modified ""multi-bin"" logscore"
+analysisData/allEnsembleScores.csv,https://doi.org/10.7910/DVN/RJE9PT,prior,Prior value for the ensemble. -2.0 = Equal weighted
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,week,"Epidemic Week (format=YYYYWW;Y=year,W=week)"
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,prior,Prior value for the ensemble. -2.0 = Equal weighted
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,modelType,static or dynamic (dynamic = adaptive)
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,CU-BMA,Logscores for the CU-BMA model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,CU-EAKFC_SEIRS,Logscores for the CU-EAKFC_SEIRS model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,CU-EAKFC_SIRS,Logscores for the CU-EAKFC_SIRS model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,CU-EKF_SEIRS,Logscores for the CU-EKF_SEIRS model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,CU-EKF_SIRS,Logscores for the CU-EKF_SIRS model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,CU-RHF_SEIRS,Logscores for the CU-RHF_SEIRS model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,CU-RHF_SIRS,Logscores for the CU-RHF_SIRS model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,Delphi-BasisRegression,Logscores for the Delphi-BasisRegression model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,Delphi-DeltaDensity1,Logscores for the Delphi-DeltaDensity1 model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,Delphi-DeltaDensity2,Logscores for the Delphi-DeltaDensity2 model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,Delphi-EmpiricalFuture,Logscores for the Delphi-EmpiricalFuture model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,Delphi-EmpiricalTraj,Logscores for the Delphi-EmpiricalTraj model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,Delphi-Uniform,Logscores for the Delphi-Uniform model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,LANL-DBMplus,Logscores for the LANL-DBMplus model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,Protea Analytics-Cheetah,Logscores for the Protea Analytics-Cheetah model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,Protea Analytics-Kudu,Logscores for the Protea Analytics-Kudu model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,Protea Analytics-Springbok,Logscores for the Protea Analytics-Springbok model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,ReichLab-KCDE,Logscores for the ReichLab-KCDE model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,ReichLab-KDE,Logscores for the ReichLab-KDE model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,ReichLab-SARIMA1,Logscores for the ReichLab-SARIMA1 model
+analysisData/allEnsembleWeights.csv,https://doi.org/10.7910/DVN/A9YZOV,ReichLab-SARIMA2,Logscores for the ReichLab-SARIMA2 model
+analysisData_preSeason/allEnsembleScores.csv,https://doi.org/10.7910/DVN/GH3C1U,modelType,static or dynamic (dynamic = adaptive)
+analysisData_preSeason/allEnsembleScores.csv,https://doi.org/10.7910/DVN/GH3C1U,region,"HHS reporting region (HHS1-HHS10, and National)"
+analysisData_preSeason/allEnsembleScores.csv,https://doi.org/10.7910/DVN/GH3C1U,target,"Forecasting target (1 wk ahead, 2 wk ahead, 3 wk ahead, 4 wk ahead)"
+analysisData_preSeason/allEnsembleScores.csv,https://doi.org/10.7910/DVN/GH3C1U,EWNum,"Epidemic Week (format=YYYYWW;Y=year,W=week)"
+analysisData_preSeason/allEnsembleScores.csv,https://doi.org/10.7910/DVN/GH3C1U,logScore,Traditional logscore
+analysisData_preSeason/allEnsembleScores.csv,https://doi.org/10.7910/DVN/GH3C1U,logScore5,"Modified ""multi-bin"" logscore"
+analysisData_preSeason/allEnsembleScores.csv,https://doi.org/10.7910/DVN/GH3C1U,prior,Prior value for the ensemble. -2.0 = Equal weighted
+allFluData,https://doi.org/10.7910/DVN/BNVXN6,releaseDate,Date the ILI values were released by the CDC
+allFluData,https://doi.org/10.7910/DVN/BNVXN6,region,"HHS reporting region (HHS1-HHS10, and National)"
+allFluData,https://doi.org/10.7910/DVN/BNVXN6,EW,"Epidemic Week (format=YYYYWW;Y=year,W=week)"
+allFluData,https://doi.org/10.7910/DVN/BNVXN6,lag,Number of weeks since this Epidemic week's first reported ILI
+allFluData,https://doi.org/10.7910/DVN/BNVXN6,ili,Influenza-like illness
+allFluData,https://doi.org/10.7910/DVN/BNVXN6,wili,weighted Influenza-like illness
+allFluData,https://doi.org/10.7910/DVN/BNVXN6,year,Year
+allFluData,https://doi.org/10.7910/DVN/BNVXN6,week,Week
+allFluData,https://doi.org/10.7910/DVN/BNVXN6,modelWeek,a sequential count of weeks per year
+allFluData,https://doi.org/10.7910/DVN/BNVXN6,calendarEW,"The Calendar week (format=YYYYWW;Y=year,W=week)"
+allFluData,https://doi.org/10.7910/DVN/BNVXN6,Season,The Influenza season (YYYY/YYYY)
