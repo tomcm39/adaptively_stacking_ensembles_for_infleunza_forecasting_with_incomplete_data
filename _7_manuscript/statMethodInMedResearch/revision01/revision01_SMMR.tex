@@ -1,0 +1,429 @@
+\documentclass[
+  fontsize=11pt,
+  paper=a4,
+  parskip=half,
+  enlargefirstpage=on,    % More space on first page
+  fromalign=right,        % PLacement of name in letter head
+  fromphone=on,           % Turn on phone number of sender
+  fromrule=aftername,     % Rule after sender name in letter head
+  addrfield=on,           % Adress field for envelope with window
+  backaddress=on,         % Sender address in this window
+  subject=beforeopening,  % Placement of subject
+  locfield=narrow,        % Additional field for sender
+  foldmarks=on,           % Print foldmarks
+]{scrlttr2}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{blindtext}
+\usepackage{tcolorbox}
+\usepackage{bbm}
+\usepackage{url}
+\usepackage{hyperref}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\def\l{\left}
+\def\r{\right}
+
+\newcommand{\f}{\frac}
+
+
+\setkomafont{fromname}{\sffamily \LARGE}
+\setkomafont{fromaddress}{\sffamily}%% statt \small
+%\setkomafont{pagenumber}{\sffamily}
+\setkomafont{subject}{\bfseries}
+\setkomafont{backaddress}{\mdseries}  
+
+\LoadLetterOption{DIN}
+\setkomavar{fromname}{Thomas~McAndrew}
+\setkomavar{fromaddress}{Lehigh University}
+\setkomavar{fromphone}{1-570-575-4341}
+\setkomavar{fromemail}{mcandrew@lehigh.edu}
+\setkomavar{backaddressseparator}{\enspace\textperiodcentered\enspace}
+\setkomavar{signature}{Thomas McAndrew}
+\setkomavar{place}{Bethlehem, PA}
+\setkomavar{date}{\today}
+\setkomavar{enclseparator}{: }
+
+\def \journal {Statistical Methods in Medical Research}
+\def \paperTitle {Adaptively stacking ensembles for influenza forecasting with incomplete data}
+\def \paperNumber {SMM-20-0565}
+
+\newcommand{\rv}[1]{\textit{\textbf{Reviewer #1}}}
+
+\def\adaptNon{\textbf{adaptive$_{\text{non}}$ }}
+\def\adaptOpt{\textbf{adaptive$_{\text{opt}}$ }}
+\def\adaptOver{\textbf{adaptive$_{\text{over}}$ }}
+
+
+
+\newtcolorbox{commt}[3][]
+{
+  colframe = #2!25,
+  colback  = #2!10,
+  coltitle = #2!20!black,  
+  title    = #3,
+  #1,
+}
+
+\pagestyle{empty}
+\pagenumbering{gobble}
+
+
+% R1 - G  (X)
+% R1 - Q1 (X)
+% R1 - Q2 (X)
+% R1 - Q3 (X)
+% R1 - Q4 (X)
+% R1 - Q5 (X) maybe make symbols bigger.
+%
+% R2-G    ()
+% R2 - Q1 (X)
+% R2 - Q2 (X)
+% R2 - Q3 ()
+% R2 - Q4 ()
+% R2 - Q5 ()
+% R2 - Q6 ()
+% R2 - Q7 ()
+% R2 - Q8 ()
+% R2 - Q9 ()
+
+
+
+\begin{document}
+  \begin{letter}{\journal\\ \textbf{\paperNumber} \\ \paperTitle}
+    \setkomavar{subject}{Response to reviewer comments}
+    \opening{Dear Professor Metcalfe, Members of the Editorial Board and Reviewers}
+
+    My coauthor and I thank you for reviewing our work.
+    Reviewer comments were well-received and we took all comments that were suggested.
+    A detailed list of reviewer comments, our response, and the resulting edits to the manuscript are included below.
+    
+    You will find a redline version of the manuscript alongisde a revised manuscript.  
+
+    We appreciate the opportunity to submit a revised and improved version of the manuscript and look forward to hearing from you.
+    
+    \closing{Sincerely,}
+  \end{letter}
+  
+    \rv{1}
+
+    \begin{commt}{red}{The author proposed a new adaptive multi-model ensemble for forecasts of seasonal influenza\, which requires no data for model fitting at the beginning of each season and updates optimal weights on a weekly basis throughout the influenza season. The author further improved the adaptive ensemble by introducing a time-dependent prior to regularize the ensemble weights. The proposed adaptive ensemble showed a favorable performance to the equal-weighted ensemble and comparable performance to a static model trained on multiple seasons of data. This is an interesting paper\, I think it mainly contributes towards further alternatives of forecasting under sparse data scenarios where no previous data is available. It’s also easy to be applied to other real-time forecasts of the disease outbreak. Some specific comments are as follows. These comments stem from some questions I have when reading the paper. Clarifying them in the revised paper\, I believe\, will remove some of my confusion.}
+
+      We thank this reviewer for their comments.
+      Comments were very well recieved and improved this manuscript.
+      Highlights include a new subsection comparing the performance of the {$\adaptNon$} and the {$\adaptOver$} to the equally weighted and static ensemble.
+      This reviewer's comments led us to conclude that if there is no historical data available to estimate an optimal prior, it is better to over regularize than to under regularize.\\ 
+
+      We have elaborated on the use of EM and VI vs SQP and Netwon-Raphson, clarified the use of an ELBO, and fixed figures and small inconsistencies the reviewer brought to our attention.\\
+
+      Because of the reviewer's careful attention to our work and several improvements we have added to the acknowledgments:\\
+
+      ``
+      We also thank the reviewers whose recommendations and insights led to a more impactful work.
+      ''
+      
+    \end{commt}
+
+
+    \begin{commt}{red}{Methods: Regarding the static ensemble\, the author applied the expectation-maximization (EM) algorithm to calculate the ensemble weights that maximize the log-likelihood. Though it’s a classic method\, it sometimes suffers a slow convergence. I am curious about using other alternative likelihood-based methods that might be faster than EM and about the same accuracy. For example\, using quasi-Newton type methods or sequential quadratic programming (SQP) to solve the constrained\, convex optimization problem.}
+
+      We thank the reviewer for this question. We should spend some time discussing approaches other than MM algorithms to this contrained optimization problem.
+      EM and VI approaches are at best linearly convergent compared to a quasi-newton or related sequential quadratic programming approaches that are super linearly convergent when the inital solution to the optimization problem is near the true solution.\\
+
+      For our application we make forecasts once a week and any algorithm that runs faster than, say 48, hours is sufficient for our work.
+      Quasi-Newton and SQP can be slightly unstable and we chose the EM/VI algorithms because they are designed to generate more stable solutions and because the EM/VI algorithm is a classic approach to estimate mixture models.\\
+
+      We added the following text to the manscript that includes citations to the Quasi-Newton and SQP approaches for interested readers:\\
+
+      `` We take two approaches to finding optimal ensemble weights: a maximum likelihood method (for the static ensemble) and a maximum aposteriori Bayesian approach (for the adaptive ensemble).
+      Below we choose to find optimal weights using the EM algorithm and Variational Inference$^{48-50}$ which find stable optima at the price of slow convergence.
+      Alternative methods like a quasi-newton$^{51}$, or the broader class of sequential quadratic programming algorithms$^{52}$ could be used to find optimal weights with superior convergence properties but may be less stable than the EM and VI approaches. 
+
+ ``
+    \end{commt}
+
+
+    
+    \begin{commt}{red}{The author showed a comparable performance between adaptive ensemble and a static ensemble. However\, theses comparable performance was based on using a prior with optimal prediction performance (highest average log score) obtained using data from season 2010/2011. This weakens the advantage of the adaptive ensemble over the static ensemble for its ability to combine models without any training data. I am interested in how the adaptive ensemble without regularization (adaptive-non) and with over regularization (adaptive-over) performed compared to the static ensemble. Or in other cases\, how does the adaptive-opt compare with a static ensemble that is trained only on data from season 2010/2011.}
+
+      We thank the reviewer for this comment because it added an important aspect to ensemble forecasting of seasonal influenza: that it is better to over regularize than to under regularize.
+      We compared the {$\text{adaptive}_{\text{non}}$} ensemble to the equally weighted ensemble and the static ensemble and report the results in Table 2.
+      Comparisons between the {$\text{adaptive}_{\text{Over}}$} ensemble and the equally weighted and static ensemble are reported in Table 3.
+      A comparison of the ${\adaptOpt}$ to the equally weighted and static ensemble is presented in Table 1. 
+      The under and over regularized ensembles perform (not surprising) worse than the optimally chosen prior. However, the ${\text{adaptive}_{\text{Over}}}$ shows better performance than the ${\text{adaptive}_{\text{Over}}}$ ensemble.\\
+      
+      This is a great result and the following subsection was added to the manuscript:\\
+
+      `` 
+      Formal comparisons~(see regression tables 2 and 3 in Suppl. 5) show that both the \adaptOver and \adaptNon ensembles outperform the equally weighted ensemble and have similar performance when compared to the static ensemble.
+      Compared to the \adaptNon ensemble, the \adaptOver ensemble shows improved performance (i.e. higher log scores) against the equally weighted and static ensemble.\\
+
+      The \adaptOver has an average increase in logscore compared to the equally weighted ensemble between $0.06$ to $0.21$.
+      The \adaptNon has an average increase between $0.03$ to $0.11$.
+      The average increases in logscore for comparions between the \adaptOver and equally weighted ensemble are all significant. The largest pvalue is $0.03$, when comparing the \adaptOver to the equally weighted ensemble in the 2012/2013 season, and all other pvalues are smaller than $0.01$.
+      A small fraction of increases in logscore for comparisons between the \adaptNon and equally weighted ensemble are significant.
+      The \adaptNon ensemble shows no improvement in HHS6 with an average increase in logscore of 0.00 (95CI = [-0.09, 0.09]; pvalue = $0.99$).
+      However, the \adaptOver shows a signficant increase in logscore in HHS6 (average increase 0.07; 95CI = [0.03,0.12]; pvalue $< 0.01$). 
+      Results between the \adaptOver and \adaptNon versus the static ensemble are similar---both ensembles show similar performance when compared to the static ensemble, but compared to the \adaptNon ensemble, differences between the \adaptOver and static ensemble are more positive and have smaller pvalues.
+      
+``
+
+      
+    \end{commt}
+
+    \begin{commt}{red}{Page 12 deEM-MM and deVI-MM Algorithms: The author stated that the EM algorithm computes the loglikelihood. Is it more accurate that also calculate the Evidence lower bound (ELBO)? For my understanding\, for both EM and VI\, the ELBO provides a lower bound for the marginal likelihood\, and Instead of maximizing the marginal likelihood directly\, the Expectation-Maximization (EM) and variational inference both maximize the ELBO. }
+
+      This is a good question. The EM algorothm and VI algorithm do both optimize an ELBO, but the reason we monitor convergence using the loglikelihood with the EM algorithm and using the ELBO with the VI algorithm (not just in this specific case, but in most cases) is because of our proposed distribution over hidden variables $z$.
+      Starting from Eq 11., the loglikelihood can be separated into an expected value over the complete loglikelihood plus the KL diverence between the conditional probability over the hidden variables and the proposed ($q$) distribution over hidden variables.
+
+      \begin{equation*}
+        \log \l[ p(\mathcal{D}) \r] = \mathbbm{E}_{q} \l\{ \log \l[ \f{p(\mathcal{D} | Z,\pi) p(Z,\pi)}{q(Z,\pi)}  \r]  \r\} + \mathrm{KL} \l[q(Z,\pi) \| p(Z,\pi| \mathcal{D}) \r] 
+      \end{equation*}
+      
+      The EM algorithm selects for $q$  a closed form solution for the conditional probability over hidden variables.
+      The VI algorithm (in general) selects a different form for $q$ that does not equal this conditional probability.
+      Because the EM selects $q = p(Z,\pi| \mathcal{D})$ the Kullback-Leibler (KL) Divergence equals zero and the lowerbound is sharp, touching the true loglikelihood.
+      We can compute the expectation over hidden variables and find the loglikelihood.
+      The VI algorithm proposes a different $q$ distribution over hidden variables that makes the KL divergence non-negative, and depedent on the probability over an intractable quantity, the probability of the data $p(D)$.
+      To see this we can decompose the KL divergence.
+
+      \begin{align*}
+        \mathrm{KL} \l[q(Z,\pi) \| p(Z,\pi| \mathcal{D}) \r]  &= \mathbbm{E}_{q} \log(q(Z,\pi)) - \mathbbm{E}_{q}\log(  p(Z,\pi| \mathcal{D}) )\\
+                                                              &= \mathbbm{E}_{q}\log(q(Z,\pi)) - \mathbbm{E}_{q}\log\l(  p(Z,\pi, \mathcal{D})  \Big /  p(\mathcal{D}) \r)\\
+                                                              &= \mathbbm{E}_{q}\log(q(Z,\pi)) - \mathbbm{E}_{q}\log(  p(Z,\pi, \mathcal{D}) )  + \mathbbm{E}_{q} ( p(\mathcal{D}) )
+      \end{align*}
+
+      But the $p(\mathcal{D})$ is a constant when we optimize over $Z$ and $\pi$, and so we can remove  {$\mathbbm{E}_{q} ( p(\mathcal{D}) )$} and minimize, and monitor, a related quantity
+      \begin{align*}
+        \mathbbm{E}_{q}\log(q(Z,\pi)) - \mathbbm{E}_{q}\log(  p(Z,\pi, \mathcal{D}) )
+      \end{align*}
+      Rather than minimize this function, many choose to maximize
+       \begin{align*}
+        \text{ELBO} =  \mathbbm{E}_{q}\log(  p(Z,\pi, \mathcal{D}) ) - \mathbbm{E}_{q}\log(q(Z,\pi)) 
+      \end{align*}
+
+      It is the choice of $q$ that determines whether or not we can monitor covergence using the loglikelihood or the ELBO.\\
+
+      We made the following change to the manuscript to clarify how the choice of $q$ is related to what quantitiy can be monitored for convergence.\\
+
+      {``
+      Because the EM algorithm chooses as $q$ the exact conditional probability over $Z$, we can monitor convergence by computing the loglikelihood, log of (6).
+      The choice of $q$ for the VI algorithm allows us to compute a related quantity called the Evidence Lower Bound (ELBO).
+      ``}
+      
+    \end{commt}
+
+
+    \begin{commt}{red}{Page 12 Fitted ensemble models \& Page 13 results: For choosing the optimal prior\, the author stated in the results part that the candidate prior varied from 0\% to 100\% by 1\%\, while in the Fitted ensemble models of the Methods part the author stated candidate prior varied from 1\% to 100\% by 1\%. Moreover\, at the results part the author stated choosing 0\% prior as (adaptive-non) ensemble while at the experimental design of the Methods part the author considered studying a ``Close to 0\% regularization (adaptive-non)''.}
+
+      We thank the reviewer for noticing this oversight in the manuscript. For the adaptive-non ensemble we chose a prior percent of $10^{-5}$ and changed the following text\\
+
+      ``We computed adaptive ensembles for prior values from close to 0\% ({$10^{-5}$} which we will refer to as {$0\%$}) to 100\% by 1\% increments for the $2010/2011$ season.''
+
+      and also changed all text related to this inconsistency.
+    \end{commt}
+
+
+    \begin{commt}{red}{Tables and Figures: Figure 4 of the structure of a single season of training data used by the ensemble model is straightforward enough. It’s not clear what each column means and what the black dots under the columns mean. Besides\, in the simplex plots (figure 1)\, the pentagon representing equal-weight ensemble and X representing static ensemble is too small to be legible. }
+
+      We thank you for the comments on figure 4 and figure 1.
+      For figure 4, we added additional information about observations to the plot and described the black dots under the columns.
+      For figure 1, we doubled the size of the pentagon symbol for equal weighting and X symbol for the weights corresponding to the static ensmeble.
+    \end{commt}
+
+    \clearpage
+    \rv{2}
+    % R2-1
+    \begin{commt}{red}{This paper develops a new ensemble approach to forecasting. The approach is in- teresting\, but the development lacks rigor\, and I have some concerns over the prior used. I think a more principled description could produce a very interesting discussion on the differences between forecasting and regular inference.
+I would also have liked to see a greater motivation for the analysis\, with a first look at the data early on\, and then more focus on the results\, in terms of forecasts\, rather than comparison of ensembles.}
+
+   We thank the reviewer for their positive read of this manuscript and bringing to our attention important points below.
+   This reviewer's comments resulted in an additional section to the manuscript \textbf{The ensemble framework as a doubly mixed model of pseudocounts} which motivates the choice of our prior and 3 additional figures that detail the ILI time series, the issue of ILI revisions, and forecasts from component models.
+   We hope this reviewer finds the additional content addresses their concerns.\\
+
+   Because of the reviewer's careful attention to our work and several improvements we have added to the acknowledgments:\\
+
+      ``
+      We also thank the reviewers whose recommendations and insights led to a more impactful work.
+      ''
+    \end{commt}
+
+    % R2-2
+    \begin{commt}{red}{To write a paper on a forecasting method for a statistical journal\, you have to try harder to justify the inferential framework you are using. It’s not sufficient to say\, ``The mixture model framework for probabilistic model averaging is the standard for the field''\, as you do on P7.}
+
+      We thank the reviewer for pushing us to motivate this work beyond stating it is a standard for the field.
+      Please find an updated paragraph in the manuscript that replaces ``This mixture model framework for probabilistic model averaging is the standard for the field'' with\\
+
+      ``
+      This mixture model framework for probabilistic model averaging makes the reasonable assumption that no single model is responsibile for generating ILI values over time.
+      Instead, individual models propose different mechanisms and incorporate different types of data to model how ILI evolves over time.
+      A probabilistic average aims to emphasize models that lead to accurate forecasts (by assigning these models larger weights) and minimize those that lead to poor forecasts.
+      By assigning weights to many different models a mixture approach to ensemble forecasting may reduce noise compared to an individual forecast.
+      This probabilistic averaging approach has become a standard for the field because of the above reasons.
+      ``
+    \end{commt}
+
+    % R2-3
+    \begin{commt}{red}{ I would liked to have seen some data early in the paper\, with a discussion of the main features.}
+      We thank the reviewer for this comment and have added three additional figures to the manuscript.\\
+      
+      The first figure plots the influenza-like illness for all 10 HHS regions and the national average for seasons 2010/2011 up to and including season 2017/2018.
+      The second figure plots for the 2017/2018 season the final influenza-like illness and all revised influenza-like illness (ILI) values by epidemic week, and the distribution of relative differences between the final influenza-like illness and revised influenza-like illness as a function of the number of weeks after the first reported ILI value. 
+      The third figure presents for all 21 component models 1, 2, 3 and 4 week ahead forecasts of the median national ILI for the 2017/2018 season.
+      In addition to these three figures, we also direct the reader to an interactive visualization of influenza-like illness by epidemic week for all HHS regions and the national average, for all regions, and for all component model forecasts:\\
+
+      ``
+      See Suppl.~14 for an example of forecasts from all 21 component models and \href{Flusightnetwork.io}{http://flusightnetwork.io/} for an interactive visulization of forecasts of ILI.
+      ''
+      
+    \end{commt}
+
+    \begin{commt}{red}{I am concerned over the Dirichlet prior choice (8). In a simple case\, suppose {$Y|p \sim \text{Bin}(n, p)$} and {$p \sim \text{Beta}(n\rho , n\rho)$}  this is a very simple version of the prior in the paper ( i.e.\, equation (16) in the paper). In this case {$ p|y \sim \text{Beta}(n\rho+y , n\rho+ n - y) $} to give {$E(p|y) = \frac{n \rho + y}{n (2 \rho + 1)}$} so this estimator is not consistent unless {$\rho$ = 0}. It's the dependence on n (N(t) in your method) that is causing the trouble---why do you want the sample size in there? I think it is related to your comment (P3) that \, ``our prior exerts a constant influence on the final model weights.''. I know your prior is intended to do something else (not focus in on one models as you get more data)\, but more discussion is required. }
+
+      We thank the reviewer for this comment, and included a new subsection in the manuscript that provides a statistical motiviation for the choice of this prior.
+      We feel this new subsection accomplishes two goals: (i) gives a stronger statistical motivation for the choice of a mixture model and (ii) a strong motivation for the choice of our prior that we believe the reviwer has asked for.
+      For convience, please find this new section below:\\
+
+      ``
+      \textbf{The ensemble framework as a doubly mixed model of pseudocounts}
+
+The choice of a prior $\alpha(t) = \rho \frac{N(t)}{M}$ may appear arbitrary, but this prior can be motivated using two techniques: (i) using pseudocounts to reinterpret the Bayesian framework of the adaptive ensemble.  and (ii) supposing ILI data is generated by a mixture of an equally weighted ensemble and an ensemble trained on the data.\\
+
+Our Bayesian framework for estimating weights was distributed, from (12), Dirichlet
+\begin{align}
+  q(\pi)  &\sim \mathrm{Dir}\l( \alpha(t) + \sum_{t=1}^{T}  r(m,t)  \r). \tag{18}\label{eq:18}
+\end{align}
+
+This distribution over weights can be reinterpreted as psuedocounts.
+Instead of assuming a single observation is a mixture of $M$ component models, we can assume at time $t$ each component model generated a subset of observations from the total number of ILI observations as follows 
+\begin{align}
+  [\theta_{1},\theta_{2},\cdots,\theta_{M}] \sim \text{Dir}\l[ \alpha, \alpha, \cdots, \alpha \r] \tag{19}\label{eq:19} \\
+  [N_{1}(t),N_{2}(t),\cdots,N_{M}(t) ]  \sim \text{Dir} \l[ \theta_{1}, \theta_{2}, \cdots, \theta \r] \tag{20}\label{eq:20}
+\end{align}
+where $\theta$ is the expected number of ILI values generated by component model $m$~( $\theta = N(t) \pi_{m}$) and $\pi_{m}$ is the fraction of ILI values generated by component model $m$, $\alpha$ parameterizes a prior distribution over pseduocounts (over the $\theta$s),  $N(t)$ is the number of ILI values at time $t$ and .\\
+
+If we define $N(t) \times M$ variables $\text{ILI}_{m,t}$ as the value $1$ when component model $m$ generated ILI value $t$ and 0 otherwise, then the posterior distribution~(see $^{36}$) over $\theta$ is
+\begin{align}
+  [\theta_{1},\theta_{2},\cdots,\theta_{M}] \sim \text{Dir}\l( \alpha + \sum_{t} \text{ILI}_{1t}, \alpha + \sum_{t} \text{ILI}_{2t}, \cdots, \alpha + \sum_{t} \text{ILI}_{Mt}\r) \label{pcounts} \tag{21}
+\end{align}
+\end{commt}
+
+
+\begin{commt}{red}{continuation of section}
+We can draw a parallel between the above model of pseudocounts and the posterior we found in (12).
+The sum of responsabilities over all ILI values at time $t$ is similar to the number of data points generated by model $m$, or $\sum_{t} \text{ILI}_{mt}$.
+Likewise, the parameter that controlled the prior over pseduocounts, $\alpha$, resembles our prior $\alpha(t)$ from (12).\\
+
+The Dirichlet distribution in \eqref{pcounts} can be parameterized as
+\begin{align}
+  [\theta_{1},\theta_{2},\cdots,\theta_{M}] \sim \text{Dir}\l( N(t) \pi^{*}_{1},  N(t) \pi^{*}_{2}, \cdots,  N(t) \pi^{*}_{M}\r) \tag{22}\label{eq:22}
+\end{align}
+
+where
+\begin{align}
+  \pi^{*}_{m} = \f{ \alpha + \sum_{t} \text{ILI}_{mt} }{\sum_{m}\alpha + N(t)}, \tag{23}\label{eq:23}
+\end{align}
+and we can again draw a parallel between this fration of ILI values generated by component model $m$ and the MAP estimate from our Bayesian framework~\eqref{mapest}.
+Our goal now is to find a suitable prior $\alpha$.
+We can motivate the choice of a prior by assuming our ensemble of component models will be combined with an equally weighted ensemble.\\
+
+
+If we assume the data generation process for ILI values is a mixture of an equally weighted ensemble $(f_{\text{equally}})$ and an ensemble that is a mixture of component models $f_{m}$ as in (2) and (3) ($f_{\text{trained}}$) then we can write the mixture model with constant weights $\rho$ and $(1-\rho)$ as
+
+\begin{align*}
+  p(y) &= \rho f_{\text{equally}} + (1-\rho)f_{\text{trained}}\\
+       &= \rho \l( \sum_{m=1}^{M} \f{1}{M} f_{m} \r) + (1-\rho) \l( \sum_{m=1}^{M} \pi_{\text{trained}} f_{m} \r) \\
+       &= \sum_{m=1}^{M} \l[ \f{\rho}{M} + (1-\rho) \pi_{\text{trained}} \r] f_{m}
+\end{align*}
+
+If we assume that the weights $\rho$ will be small relative to $1$ then
+\begin{align*}
+  p(y) &= \sum_{m=1}^{M} \l[ \f{\rho}{M} + (1-\rho) \pi_{\text{trained}} \r] f_{m}  \approx \sum_{m=1}^{M} \l[ \pi_{\text{trained}} + \f{\rho}{M} \r] f_{m} 
+\end{align*}
+
+and so our weights for this doubly mixed model are proportional to 
+\begin{align}
+  \pi_{\text{doubly mixed}} \propto \pi_{\text{trained}} + \f{\rho}{M}. \tag{24}\label{eq:24}
+\end{align}
+
+We can guarantee our doubly mixed weights sum to one by dividing each weight by the sum of all weights plus the additional constant $(\f{\rho}{M})$
+\begin{align}
+  \pi_{\text{doubly mixed}}  =  \f{\pi_{\text{trained}} + \f{\rho}{M}}{1 + \rho} \tag{25}\label{eq:25}
+\end{align}
+where we used the fact that $\sum_{m} \pi_{\text{trained}} = 1$.
+\end{commt}
+
+\begin{commt}{red}{continuation of section}
+Assume each component model generated $N(t) \pi_{\text{doubly mixed}}$ of the ILI values on average.
+\begin{align}
+  N(t) \pi_{\text{doubly mixed}}  &=  N(t) \f{\pi_{\text{trained}} + \f{\rho}{M}}{1 + \rho} \nonumber \\ 
+                               &= \f{ N(t)\pi_{\text{trained}} + \rho \f{ N(t)}{M}}{1 + \rho} \nonumber \\
+                               & \approx  N(t)\pi_{\text{trained}} + \rho \f{ N(t)}{M} \tag{26}\label{eq:26}
+\end{align}
+
+A potential prior that will act like a mixture of an equally weighted ensemble and an ensemble fit via maximum likelihood is then
+\begin{align*}
+  \alpha(t) = \rho \f{N}{M}.
+\end{align*}
+
+The formulation above is a more statistically motiviated way for our choice of prior.
+      ''      
+    \end{commt}
+
+    \begin{commt}{red}{What are the 21 component models? I was surprised that this was not discussed on P11.
+        This lack of description is consistent with a “black box” approach to forecasting\, but I think there is more to your approach than that\, however\, you need to provide a more statistical motivation.}
+      We added a figure that presents forecasts from all $21$ component models, a link to an interactive visualization of models that forecast ILI, and a citation to a published manuscript that details all 21 component models.
+      We provided a more statistical motiviation, per the reviewer's above comment, on the use of a mixture model and included this motivation below for convienance:\\
+
+      ``
+      This mixture model framework for probabilistic model averaging makes the reasonable assumption that no single model is responsibile for generating ILI values over time.
+      Instead, individual models propose different mechanisms and incorporate different types of data to model how ILI evolves over time.
+      A probabilistic average aims to emphasize models that lead to accurate forecasts (by assigning these models larger weights) and minimize those that lead to poor forecasts.
+      By assigning weights to many different models a mixture approach to ensemble forecasting may reduce noise compared to an individual forecast.
+      This probabilistic averaging approach has become a standard for the field because of the above reasons.
+      ``\\
+
+      We also now direct the reader to a manuscript that details all 21 component models
+
+      ``
+      See Suppl.~14 for an example of forecasts from all 21 component models,  \href{Flusightnetwork.io}{http://flusightnetwork.io/} for an interactive visulization of forecasts of ILI, and 45, specifically Table 1, for details about each component model.
+      ''
+      
+    \end{commt}
+
+
+    \begin{commt}{red}{The majority of the results section discusses comparison of the different ensemble approaches\, but what would the form of your forecasts be for public health researchers? Forecasts\, presumably (which you could show with the data)\, but with uncertainty intervals? If the latter are available from your approach\, are they well-calibrated?}
+
+      This is a great question.
+      Yes, median estimates of ILI and often 50\% and 90\% prediction intervals are provided to public health officals~(see http://flusightnetwork.io/ for an example).
+      The logarithmic (log) score that we use is a proper scoring rule and assesses both the calibration and sharpness of a predictive distribution.\\
+      
+      We made this clearer for the reader by adding the following text and citations:
+
+      ``Proper scoring rules measure a forecast's calibration and sharpness$^{48,49}$ by penalizing a predictive distribution~$F$ that does not match the distribution of true values $G^{48}$. ''
+      
+    \end{commt}
+
+    \begin{commt}{red}{P5. Figure 5 seems to be the first figure that is referred to so should be Figure 1.}
+      We thank the reviewer and this was corrected.
+    \end{commt}
+
+    \begin{commt}{red}{P9. Give a reference for the statement\, ``Iteratively optimizing this lower bound can be shown to monotonically improve the loglikelihood...''.}
+      We added two references: The original work by Dempster and Laird and an informative exposition by Christopher Bishop (chapters 9 and 10).
+    \end{commt}
+
+    \begin{commt}{red}{P11. Which of the EM and VI algorithms do you prefer?}
+      Personally, we prefer the VI algorithm because it generalized the EM algorithm.
+      Please see the side by side comparison of these to algorithms in figure 3 and the section ``eEM-MM and deVI-MM Algorithms''.
+    \end{commt}
+
+    \begin{commt}{red}{P12. I don’t understand why a model is needed to compare log scores.}
+      We chose a regression model as a unified approach to compare logscores.
+      We could have performed several independent tests, but felt the regression approach was more straightforward.
+    \end{commt}
+
+
+  
+\end{document}
